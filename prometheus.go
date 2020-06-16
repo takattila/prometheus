@@ -110,3 +110,18 @@ func (o *Object) ElapsedTime(metricName string, labels []Label, since time.Time,
 		o.Histogram(metricName, labels, time.Since(begin).Seconds(), units...)
 	}(since)
 }
+
+func (o *Object) Gauge(metricName string, labels []Label, value float64) {
+	if o.gauges[metricName] == nil {
+		o.gauges[metricName] = kitProm.NewGaugeFrom(clientGo.GaugeOpts{
+			Namespace:   o.App,
+			Subsystem:   o.Env,
+			Name:        metricName + "_gauge",
+			Help:        fmt.Sprintf("Gauge for: %s %+v", metricName, labels),
+			ConstLabels: clientGo.Labels{},
+		}, getLabelNames(labels))
+		o.gauges[metricName].With(makeSlice(labels)...).Add(value)
+		return
+	}
+	o.gauges[metricName].With(makeSlice(labels)...).Set(value)
+}
