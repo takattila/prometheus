@@ -40,3 +40,7 @@ func makeSlice(labels []Label) []string {
 	}
 	return slice
 }
+
+func makeFQDN(appName, env, metric, metricType string) string {
+	return appName + "_" + env + "_" + metric + "_" + metricType
+}

@@ -8,7 +8,6 @@ import (
 	clientGo "github.com/prometheus/client_golang/prometheus"
 )
 
-
 // GenerateUnits creates a float64 slice to measure request durations.
 func GenerateUnits(start, width float64, count int) []float64 {
 	return clientGo.LinearBuckets(start, width, count)
@@ -40,17 +39,16 @@ func makeLinearBuckets(buckets []float64) []float64 {
 // A histogram is also suitable to calculate an Apdex score.
 // When operating on buckets, remember that the histogram is cumulative.
 func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) {
-	if o.histograms[metricName] == nil {
-		o.histograms[metricName] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
-			Namespace:   o.App,
-			Subsystem:   o.Env,
-			Name:        metricName + "_histogram",
-			Help:        fmt.Sprintf("Histogram for: %s %+v", metricName, labels),
+	fqdn := makeFQDN(o.App, o.Env, metricName, "histogram")
+	if o.histograms[fqdn] == nil {
+		o.histograms[fqdn] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
+			Name:        fqdn,
+			Help:        fmt.Sprintf("Histogram for: %s", metricName),
 			Buckets:     makeLinearBuckets(units),
 			ConstLabels: clientGo.Labels{},
 		}, getLabelNames(labels))
 	}
-	o.histograms[metricName].With(makeSlice(labels)...).Observe(since)
+	o.histograms[fqdn].With(makeSlice(labels)...).Observe(since)
 }
 
 // ElapsedTime is a histogram for request duration,
