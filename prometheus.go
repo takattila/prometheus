@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"fmt"
+	"net/http"
 
 	kitMet "github.com/go-kit/kit/metrics"
 )
@@ -29,19 +30,21 @@ type Object struct {
 	counters   map[string]kitMet.Counter
 	histograms map[string]kitMet.Histogram
 	gauges     map[string]kitMet.Gauge
+	server     *http.Server
 }
 
 // New creates a new Object structure.
 func New(i Init) *Object {
+	addr := fmt.Sprintf("%s:%d", i.Host, i.Port)
 	o := &Object{
-		Addr: fmt.Sprintf("%s:%d", i.Host, i.Port),
+		Addr: addr,
 		Env:  i.Environment,
 		App:  i.AppName,
 
 		counters:   make(map[string]kitMet.Counter),
 		histograms: make(map[string]kitMet.Histogram),
 		gauges:     make(map[string]kitMet.Gauge),
+		server:     serve(addr),
 	}
-	go o.serve()
 	return o
 }
