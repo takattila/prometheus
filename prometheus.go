@@ -3,6 +3,7 @@ package prometheus
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	kitMet "github.com/go-kit/kit/metrics"
 	kitProm "github.com/go-kit/kit/metrics/prometheus"
@@ -77,4 +78,35 @@ func (o *Object) Counter(metricName string, labels []Label, delta float64) {
 		}, getLabelNames(labels))
 	}
 	o.counters[metricName].With(makeSlice(labels)...).Add(delta)
+}
+
+func makeLinearBuckets(buckets []float64) []float64 {
+	if len(buckets) == 0 {
+		return GenerateUnits(0.5, 0.5, 20)
+	}
+	return buckets
+}
+
+func GenerateUnits(start, width float64, count int) []float64 {
+	return clientGo.LinearBuckets(start, width, count)
+}
+
+func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) {
+	if o.histograms[metricName] == nil {
+		o.histograms[metricName] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
+			Namespace:   o.App,
+			Subsystem:   o.Env,
+			Name:        metricName + "_histogram",
+			Help:        fmt.Sprintf("Histogram for: %s %+v", metricName, labels),
+			Buckets:     makeLinearBuckets(units),
+			ConstLabels: clientGo.Labels{},
+		}, getLabelNames(labels))
+	}
+	o.histograms[metricName].With(makeSlice(labels)...).Observe(since)
+}
+
+func (o *Object) ElapsedTime(metricName string, labels []Label, since time.Time, units ...float64) {
+	func(begin time.Time) {
+		o.Histogram(metricName, labels, time.Since(begin).Seconds(), units...)
+	}(since)
 }
