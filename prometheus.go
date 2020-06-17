@@ -1,6 +1,7 @@
 package prometheus
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -44,7 +45,18 @@ func New(i Init) *Object {
 		counters:   make(map[string]kitMet.Counter),
 		histograms: make(map[string]kitMet.Histogram),
 		gauges:     make(map[string]kitMet.Gauge),
-		server:     serve(addr),
 	}
+	o.StartHttpServer()
 	return o
+}
+
+// StartHttpServer starts providing metrics data
+// on given host and port on all route.
+func (o *Object) StartHttpServer() {
+	o.server = o.serve()
+}
+
+// StopHttpServer ends providing metrics data.
+func (o *Object) StopHttpServer() {
+	_ = o.server.Shutdown(context.Background())
 }

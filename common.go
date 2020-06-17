@@ -1,28 +1,57 @@
 package prometheus
 
 import (
+	"bufio"
+	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/pressly/chi"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-func serve(addr string) *http.Server {
+func (o *Object) serve() *http.Server {
 	r := chi.NewRouter()
-
-	r.Handle("/", promhttp.Handler())
+	r.Handle("/*", promhttp.Handler())
 
 	s := &http.Server{
-		Addr:           addr,
+		Addr:           o.Addr,
 		Handler:        r,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
 	go func() { _ = s.ListenAndServe() }()
 
 	return s
+}
+
+func grep(grep, text string) (result string) {
+	scanner := bufio.NewScanner(strings.NewReader(text))
+	for scanner.Scan() {
+		if strings.Contains(strings.ToLower(scanner.Text()), strings.ToLower(grep)) {
+			result += "\n" + scanner.Text()
+		}
+	}
+	return
+}
+
+func (o *Object) getMetrics() string {
+	var resp *http.Response
+	var err error
+
+	for {
+		resp, err = http.Get("http://" + o.Addr)
+		if err == nil {
+			break
+		}
+	}
+
+	buf, _ := ioutil.ReadAll(resp.Body)
+
+	return string(buf)
 }
 
 func getLabelNames(labels []Label) []string {
