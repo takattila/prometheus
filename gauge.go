@@ -13,16 +13,27 @@ import (
 // Gauges are typically used for measured values like temperatures
 // or current memory usage, but also "counts" that can go up and down,
 // like the number of concurrent requests.
-func (o *Object) Gauge(metricName string, labels []Label, value float64) {
+func (o *Object) Gauge(metricName string, labels []Label, value float64) (err error) {
 	fqdn := makeFQDN(o.App, o.Env, metricName, "gauge")
+	labelNames := getLabelNames(labels)
+
+	defer func() {
+		if r := recover(); r != nil {
+			err = o.errorHandler(r, fqdn, labelNames)
+		}
+	}()
+
 	if o.gauges[fqdn] == nil {
 		o.gauges[fqdn] = kitProm.NewGaugeFrom(clientGo.GaugeOpts{
 			Name:        fqdn,
 			Help:        fmt.Sprintf("Gauge for: %s", metricName),
 			ConstLabels: clientGo.Labels{},
-		}, getLabelNames(labels))
+		}, labelNames)
+
 		o.gauges[fqdn].With(makeSlice(labels)...).Add(value)
 		return
 	}
+
 	o.gauges[fqdn].With(makeSlice(labels)...).Set(value)
+	return
 }

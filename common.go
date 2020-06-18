@@ -2,6 +2,7 @@ package prometheus
 
 import (
 	"bufio"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -72,4 +73,22 @@ func makeSlice(labels []Label) []string {
 
 func makeFQDN(appName, env, metric, metricType string) string {
 	return appName + "_" + env + "_" + metric + "_" + metricType
+}
+
+func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []string) error {
+	metric := o.GetMetrics(fqdn)
+	givenLabelNames := strings.Join(inputLabelNames, ", ")
+	correctLabelNames := func() (ret string) {
+		ln := getLabelNames(GetLabels(metric, fqdn))
+		if len(ln) != 0 {
+			ret = fmt.Sprintf(", correct label names: '%s'", strings.Join(ln, ", "))
+		}
+		return
+	}
+
+	return fmt.Errorf("metric: '%s', error: '%s', input label names: '%s'%s\n",
+		fqdn,
+		err,
+		givenLabelNames,
+		correctLabelNames())
 }

@@ -38,23 +38,34 @@ func makeLinearBuckets(buckets []float64) []float64 {
 //
 // A histogram is also suitable to calculate an Apdex score.
 // When operating on buckets, remember that the histogram is cumulative.
-func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) {
+func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) (err error) {
 	fqdn := makeFQDN(o.App, o.Env, metricName, "histogram")
+	labelNames := getLabelNames(labels)
+
+	defer func() {
+		if r := recover(); r != nil {
+			err = o.errorHandler(r, fqdn, labelNames)
+		}
+	}()
+
 	if o.histograms[fqdn] == nil {
 		o.histograms[fqdn] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
 			Name:        fqdn,
 			Help:        fmt.Sprintf("Histogram for: %s", metricName),
 			Buckets:     makeLinearBuckets(units),
 			ConstLabels: clientGo.Labels{},
-		}, getLabelNames(labels))
+		}, labelNames)
 	}
+
 	o.histograms[fqdn].With(makeSlice(labels)...).Observe(since)
+	return
 }
 
 // ElapsedTime is a histogram for request duration,
 // exported via a Prometheus summary with dynamically-computed quantiles.
-func (o *Object) ElapsedTime(metricName string, labels []Label, since time.Time, units ...float64) {
+func (o *Object) ElapsedTime(metricName string, labels []Label, since time.Time, units ...float64) (err error) {
 	func(begin time.Time) {
-		o.Histogram(metricName, labels, time.Since(begin).Seconds(), units...)
+		err = o.Histogram(metricName, labels, time.Since(begin).Seconds(), units...)
 	}(since)
+	return
 }

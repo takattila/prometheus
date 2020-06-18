@@ -16,7 +16,7 @@ type histogramSuite struct {
 func (s histogramSuite) TestHistogram() {
 	p := New(initProm("TestHistogram"))
 
-	p.Histogram("example", []Label{
+	err := p.Histogram("example", []Label{
 		{
 			Name:  "foo1",
 			Value: "bar1",
@@ -26,6 +26,7 @@ func (s histogramSuite) TestHistogram() {
 			Value: "bar2",
 		},
 	}, time.Since(time.Now()).Seconds(), GenerateUnits(0.5, 0.5, 20)...)
+	s.Equal(nil, err)
 
 	for _, unit := range GenerateUnits(0.5, 0.5, 20) {
 		expected := `TestHistogram_test_example_histogram_bucket{foo1="bar1",foo2="bar2",le="` + fmt.Sprintf("%g", unit) + `"} 1`
@@ -48,20 +49,68 @@ func (s histogramSuite) TestHistogram() {
 func (s histogramSuite) TestElapsedTime() {
 	p := New(initProm("TestElapsedTime"))
 
-	p.ElapsedTime("example", []Label{
+	defer func(begin time.Time) {
+
+		buckets := GenerateUnits(0.02, 0.02, 10)
+
+		err := p.ElapsedTime("example", []Label{
+			{
+				Name:  "foo1",
+				Value: "bar1",
+			},
+		}, begin, buckets...)
+
+		s.Equal(nil, err)
+
+		output := p.getMetrics()
+
+		for _, unit := range buckets {
+			expected := `TestElapsedTime_test_example_histogram_bucket{foo1="bar1",le="` + fmt.Sprintf("%g", unit) + `"}`
+			actual := grep(p.App, output)
+
+			s.Equal(true, strings.Contains(actual, expected))
+		}
+
+		expectedSum := `TestElapsedTime_test_example_histogram_sum{foo1="bar1"}`
+		expectedCount := `TestElapsedTime_test_example_histogram_count{foo1="bar1"} 1`
+
+		actual := grep(p.App, output)
+
+		s.Equal(true, strings.Contains(actual, expectedSum))
+		s.Equal(true, strings.Contains(actual, expectedCount))
+
+		p.StopHttpServer()
+
+	}(time.Now())
+
+	time.Sleep(100 * time.Millisecond)
+}
+
+func (s histogramSuite) TestHistogramError() {
+	p := New(initProm("TestHistogramError"))
+
+	err := p.Histogram("example", []Label{
 		{
 			Name:  "foo1",
 			Value: "bar1",
 		},
-	}, time.Now())
+		{
+			Name:  "foo2",
+			Value: "bar2",
+		},
+	}, time.Since(time.Now()).Seconds())
+	s.Equal(nil, err)
 
-	expectedSum := `TestElapsedTime_test_example_histogram_sum{foo1="bar1"}`
-	expectedCount := `TestElapsedTime_test_example_histogram_count{foo1="bar1"} 1`
+	// Missing label name
+	err = p.Histogram("example", []Label{
+		{
+			Name:  "foo1",
+			Value: "bar1",
+		},
+	}, time.Since(time.Now()).Seconds())
 
-	actual := grep(p.App, p.getMetrics())
-
-	s.Equal(true, strings.Contains(actual, expectedSum))
-	s.Equal(true, strings.Contains(actual, expectedCount))
+	expected := `metric: 'TestHistogramError_test_example_histogram', error: 'inconsistent label cardinality: expected 2 label values but got 1 in prometheus.Labels{"foo1":"bar1"}', input label names: 'foo1', correct label names: 'foo1, foo2'` + "\n"
+	s.Equal(expected, fmt.Sprint(err))
 
 	p.StopHttpServer()
 }

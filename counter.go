@@ -11,14 +11,24 @@ import (
 // whose value can only increase or be reset to zero on restart.
 // For example, you can use a counter to represent the number
 // of requests served, tasks completed, or errors.
-func (o *Object) Counter(metricName string, labels []Label, delta float64) {
+func (o *Object) Counter(metricName string, labels []Label, delta float64) (err error) {
 	fqdn := makeFQDN(o.App, o.Env, metricName, "counter")
+	labelNames := getLabelNames(labels)
+
+	defer func() {
+		if r := recover(); r != nil {
+			err = o.errorHandler(r, fqdn, labelNames)
+		}
+	}()
+
 	if o.counters[fqdn] == nil {
 		o.counters[fqdn] = kitProm.NewCounterFrom(clientGo.CounterOpts{
 			Name:        fqdn,
 			Help:        fmt.Sprintf("Counter for: %s", metricName),
 			ConstLabels: clientGo.Labels{},
-		}, getLabelNames(labels))
+		}, labelNames)
 	}
+
 	o.counters[fqdn].With(makeSlice(labels)...).Add(delta)
+	return
 }
