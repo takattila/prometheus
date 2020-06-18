@@ -83,10 +83,10 @@ func ExampleParseOutput() {
 	fmt.Println(metric)
 	fmt.Println(parsed)
 
-	// Output:
+	// Output example:
 	// # HELP go_goroutines Number of goroutines that currently exist.
 	// # TYPE go_goroutines gauge
-	// go_goroutines 24
+	// go_goroutines 9
 	// map[go_goroutines:name:"go_goroutines" help:"Number of goroutines that currently exist." type:GAUGE metric:<> ]
 }
 

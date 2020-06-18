@@ -49,7 +49,7 @@ func ExampleObject_ElapsedTime() {
 	})
 
 	defer func(begin time.Time) {
-		units := prometheus.GenerateUnits(0.02, 0.02, 5)
+		units := prometheus.GenerateUnits(0.05, 0.05, 5)
 
 		err := p.ElapsedTime("response", []prometheus.Label{
 			{
@@ -61,21 +61,21 @@ func ExampleObject_ElapsedTime() {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 	}(time.Now())
 
-	fmt.Println()
-	fmt.Println(p.GetMetrics("ExampleElapsedTime"))
+	time.Sleep(100 * time.Millisecond)
 
 	// Output example:
 	// # HELP ExampleElapsedTime_test_response_histogram Histogram for: response
 	// # TYPE ExampleElapsedTime_test_response_histogram histogram
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.02"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.04"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.06"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.08"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.1"} 1
+	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.05"} 0
+	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.1"} 0
+	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.15000000000000002"} 1
+	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.2"} 1
+	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.25"} 1
 	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="+Inf"} 1
-	// ExampleElapsedTime_test_response_histogram_sum{handler="purchases"} 6.675e-06
+	// ExampleElapsedTime_test_response_histogram_sum{handler="purchases"} 0.100382976
 	// ExampleElapsedTime_test_response_histogram_count{handler="purchases"} 1
 }
 
