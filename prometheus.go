@@ -1,3 +1,4 @@
+// The prometheus package provides Prometheus implementations for metrics.
 package prometheus
 
 import (
@@ -7,6 +8,7 @@ import (
 	"strings"
 
 	kitMet "github.com/go-kit/kit/metrics"
+	"github.com/phayes/freeport"
 	dto "github.com/prometheus/client_model/go"
 	"github.com/prometheus/common/expfmt"
 )
@@ -90,5 +92,11 @@ func GetLabels(text, metric string) (labels []Label) {
 			})
 		}
 	}
+	return
+}
+
+// GetFreePort asks the kernel for a free open port that is ready to use.
+func GetFreePort() (port int) {
+	port, _ = freeport.GetFreePort()
 	return
 }

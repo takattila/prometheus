@@ -1,10 +1,8 @@
 package prometheus
 
 import (
-	"log"
 	"testing"
 
-	"github.com/phayes/freeport"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -12,18 +10,10 @@ type commonSuite struct {
 	suite.Suite
 }
 
-func getFreePort() (port int) {
-	port, err := freeport.GetFreePort()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return
-}
-
 func initProm(appName string) Init {
 	return Init{
 		Host:        "0.0.0.0",
-		Port:        getFreePort(),
+		Port:        GetFreePort(),
 		Environment: "test",
 		AppName:     appName,
 	}
