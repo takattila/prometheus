@@ -50,3 +50,40 @@ func (o *Object) statCountGoroutines() {
 		}()
 	}
 }
+
+func (o *Object) statMemoryUsage() {
+	if o.StatMemoryUsage {
+		t := time.NewTicker(time.Second)
+
+		m := runtime.MemStats{}
+		runtime.ReadMemStats(&m)
+
+		byteToMB := func(b uint64) uint64 {
+			return b / 1024 / 1024
+		}
+
+		go func() {
+			for range t.C {
+				_ = o.Gauge("stat_memory_usage:alloc", []Label{}, float64(byteToMB(m.Alloc)))
+			}
+		}()
+
+		go func() {
+			for range t.C {
+				_ = o.Gauge("stat_memory_usage:total", []Label{}, float64(byteToMB(m.TotalAlloc)))
+			}
+		}()
+
+		go func() {
+			for range t.C {
+				_ = o.Gauge("stat_memory_usage:sys", []Label{}, float64(byteToMB(m.Sys)))
+			}
+		}()
+
+		go func() {
+			for range t.C {
+				_ = o.Gauge("stat_memory_usage:gc", []Label{}, float64(m.NumGC))
+			}
+		}()
+	}
+}
