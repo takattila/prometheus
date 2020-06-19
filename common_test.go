@@ -16,6 +16,8 @@ func initProm(appName string) Init {
 		Port:        GetFreePort(),
 		Environment: "test",
 		AppName:     appName,
+
+		StatCountGoroutines: true,
 	}
 }
 

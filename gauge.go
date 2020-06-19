@@ -41,10 +41,12 @@ func (o *Object) Gauge(metricName string, labels []Label, value float64) (err er
 }
 
 func (o *Object) statCountGoroutines() {
-	t := time.NewTicker(time.Second)
-	go func() {
-		for range t.C {
-			_ = o.Gauge("stat_count_goroutines", []Label{}, float64(runtime.NumGoroutine()))
-		}
-	}()
+	if o.StatCountGoroutines {
+		t := time.NewTicker(time.Second)
+		go func() {
+			for range t.C {
+				_ = o.Gauge("stat_count_goroutines", []Label{}, float64(runtime.NumGoroutine()))
+			}
+		}()
+	}
 }

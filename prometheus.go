@@ -15,6 +15,8 @@ type Init struct {
 	Port        int
 	Environment string
 	AppName     string
+
+	StatCountGoroutines bool
 }
 
 // Label used by metric types: Counter, Histogram, Gauge
@@ -29,6 +31,8 @@ type Object struct {
 	Env  string
 	App  string
 
+	StatCountGoroutines bool
+
 	counters   map[string]kitMet.Counter
 	histograms map[string]kitMet.Histogram
 	gauges     map[string]kitMet.Gauge
@@ -41,6 +45,8 @@ func New(i Init) *Object {
 		Addr: fmt.Sprintf("%s:%d", i.Host, i.Port),
 		Env:  i.Environment,
 		App:  i.AppName,
+
+		StatCountGoroutines: i.StatCountGoroutines,
 
 		counters:   make(map[string]kitMet.Counter),
 		histograms: make(map[string]kitMet.Histogram),
