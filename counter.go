@@ -12,23 +12,23 @@ import (
 // For example, you can use a counter to represent the number
 // of requests served, tasks completed, or errors.
 func (o *Object) Counter(metricName string, labels []Label, delta float64) (err error) {
-	fqdn := makeFQDN(o.App, o.Env, metricName, "counter")
+	labels = o.addServiceInfoToLabels(labels)
 	labelNames := getLabelNames(labels)
 
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, fqdn, labelNames)
+			err = o.errorHandler(r, metricName, labelNames)
 		}
 	}()
 
-	if o.counters[fqdn] == nil {
-		o.counters[fqdn] = kitProm.NewCounterFrom(clientGo.CounterOpts{
-			Name:        fqdn,
+	if o.counters[metricName] == nil {
+		o.counters[metricName] = kitProm.NewCounterFrom(clientGo.CounterOpts{
+			Name:        metricName,
 			Help:        fmt.Sprintf("Counter for: %s", metricName),
 			ConstLabels: clientGo.Labels{},
 		}, labelNames)
 	}
 
-	o.counters[fqdn].With(makeSlice(labels)...).Add(delta)
+	o.counters[metricName].With(makeSlice(labels)...).Add(delta)
 	return
 }

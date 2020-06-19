@@ -39,25 +39,25 @@ func makeLinearBuckets(buckets []float64) []float64 {
 // A histogram is also suitable to calculate an Apdex score.
 // When operating on buckets, remember that the histogram is cumulative.
 func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) (err error) {
-	fqdn := makeFQDN(o.App, o.Env, metricName, "histogram")
+	labels = o.addServiceInfoToLabels(labels)
 	labelNames := getLabelNames(labels)
 
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, fqdn, labelNames)
+			err = o.errorHandler(r, metricName, labelNames)
 		}
 	}()
 
-	if o.histograms[fqdn] == nil {
-		o.histograms[fqdn] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
-			Name:        fqdn,
+	if o.histograms[metricName] == nil {
+		o.histograms[metricName] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
+			Name:        metricName,
 			Help:        fmt.Sprintf("Histogram for: %s", metricName),
 			Buckets:     makeLinearBuckets(units),
 			ConstLabels: clientGo.Labels{},
 		}, labelNames)
 	}
 
-	o.histograms[fqdn].With(makeSlice(labels)...).Observe(since)
+	o.histograms[metricName].With(makeSlice(labels)...).Observe(since)
 	return
 }
 

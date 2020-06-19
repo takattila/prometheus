@@ -60,10 +60,6 @@ func makeSlice(labels []Label) []string {
 	return slice
 }
 
-func makeFQDN(appName, env, metric, metricType string) string {
-	return appName + "_" + env + "_" + metric + "_" + metricType
-}
-
 func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []string) error {
 	metric := o.GetMetrics(fqdn)
 	givenLabelNames := strings.Join(inputLabelNames, ", ")
@@ -80,4 +76,10 @@ func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []st
 		err,
 		givenLabelNames,
 		correctLabelNames())
+}
+
+func (o *Object) addServiceInfoToLabels(labels []Label) []Label {
+	return append(labels,
+		Label{Name: "app", Value: o.App},
+		Label{Name: "env", Value: o.Env})
 }

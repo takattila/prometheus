@@ -15,7 +15,7 @@ type counterSuite struct {
 func (s counterSuite) TestCounter() {
 	p := New(initProm("TestCounter"))
 
-	err := p.Counter("example", []Label{
+	err := p.Counter("example_counter", []Label{
 		{
 			Name:  "foo1",
 			Value: "bar1",
@@ -27,7 +27,7 @@ func (s counterSuite) TestCounter() {
 	}, 1)
 	s.Equal(nil, err)
 
-	expected := `TestCounter_test_example_counter{foo1="bar1",foo2="bar2"} 1`
+	expected := `example_counter{app="TestCounter",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual := p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expected))
@@ -38,7 +38,7 @@ func (s counterSuite) TestCounter() {
 func (s counterSuite) TestCounterError() {
 	p := New(initProm("TestCounterError"))
 
-	actual := p.Counter("example", []Label{
+	actual := p.Counter("example_counter_error", []Label{
 		{
 			Name:  "bad label foo1",
 			Value: "bar1",
@@ -46,7 +46,7 @@ func (s counterSuite) TestCounterError() {
 	}, 1)
 
 	// Incorrect label name
-	expected := `metric: 'TestCounterError_test_example_counter', error: 'descriptor Desc{fqName: "TestCounterError_test_example_counter", help: "Counter for: example", constLabels: {}, variableLabels: [bad label foo1]} is invalid: "bad label foo1" is not a valid label name for metric "TestCounterError_test_example_counter"', input label names: 'bad label foo1'` + "\n"
+	expected := `metric: 'example_counter_error', error: 'descriptor Desc{fqName: "example_counter_error", help: "Counter for: example_counter_error", constLabels: {}, variableLabels: [bad label foo1 app env]} is invalid: "bad label foo1" is not a valid label name for metric "example_counter_error"', input label names: 'bad label foo1, app, env'` + "\n"
 	s.Equal(expected, fmt.Sprint(actual))
 
 	p.StopHttpServer()

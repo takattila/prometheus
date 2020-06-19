@@ -16,44 +16,35 @@ import (
 // or current memory usage, but also "counts" that can go up and down,
 // like the number of concurrent requests.
 func (o *Object) Gauge(metricName string, labels []Label, value float64) (err error) {
-	fqdn := makeFQDN(o.App, o.Env, metricName, "gauge")
+	labels = o.addServiceInfoToLabels(labels)
 	labelNames := getLabelNames(labels)
 
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, fqdn, labelNames)
+			err = o.errorHandler(r, metricName, labelNames)
 		}
 	}()
 
-	if o.gauges[fqdn] == nil {
-		o.gauges[fqdn] = kitProm.NewGaugeFrom(clientGo.GaugeOpts{
-			Name:        fqdn,
+	if o.gauges[metricName] == nil {
+		o.gauges[metricName] = kitProm.NewGaugeFrom(clientGo.GaugeOpts{
+			Name:        metricName,
 			Help:        fmt.Sprintf("Gauge for: %s", metricName),
 			ConstLabels: clientGo.Labels{},
 		}, labelNames)
 
-		o.gauges[fqdn].With(makeSlice(labels)...).Add(value)
+		o.gauges[metricName].With(makeSlice(labels)...).Add(value)
 		return
 	}
 
-	o.gauges[fqdn].With(makeSlice(labels)...).Set(value)
+	o.gauges[metricName].With(makeSlice(labels)...).Set(value)
 	return
 }
 
-func (o *Object) countGoroutines() {
+func (o *Object) statCountGoroutines() {
 	t := time.NewTicker(time.Second)
 	go func() {
 		for range t.C {
-			o.Gauge("goroutines", []Label{
-				{
-					Name:  "app",
-					Value: o.App,
-				},
-				{
-					Name:  "env",
-					Value: o.Env,
-				},
-			}, float64(runtime.NumGoroutine()))
+			_ = o.Gauge("stat_count_goroutines", []Label{}, float64(runtime.NumGoroutine()))
 		}
 	}()
 }

@@ -43,12 +43,6 @@ func (s commonSuite) TestMakeSlice() {
 	s.Equal(expected, actual)
 }
 
-func (s commonSuite) TestMakeFQDN() {
-	expected := `TestCounter_test_example_counter`
-	actual := makeFQDN("TestCounter", "test", "example", "counter")
-	s.Equal(expected, actual)
-}
-
 func TestCommonSuite(t *testing.T) {
 	suite.Run(t, new(commonSuite))
 }

@@ -22,21 +22,21 @@ func ExampleObject_Histogram() {
 	err := p.Histogram("history", []prometheus.Label{
 		{
 			Name:  "sell",
-			Value: "2020",
+			Value: "actual",
 		},
 	}, since, units...)
 
 	fmt.Println()
-	fmt.Println(p.GetMetrics("ExampleHistogram_test_history_histogram_bucket"))
+	fmt.Println(p.GetMetrics("history_bucket"))
 	fmt.Println("Error:", err)
 
 	// Output:
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="1"} 1
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="2"} 1
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="3"} 1
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="4"} 1
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="5"} 1
-	// ExampleHistogram_test_history_histogram_bucket{sell="2020",le="+Inf"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="1"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="2"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="3"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="4"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="5"} 1
+	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="+Inf"} 1
 	// Error: <nil>
 }
 
@@ -48,10 +48,12 @@ func ExampleObject_ElapsedTime() {
 		AppName:     "ExampleElapsedTime",
 	})
 
+	start := time.Now()
+
 	defer func(begin time.Time) {
 		units := prometheus.GenerateUnits(0.05, 0.05, 5)
 
-		err := p.ElapsedTime("response", []prometheus.Label{
+		err := p.ElapsedTime("get_stat", []prometheus.Label{
 			{
 				Name:  "handler",
 				Value: "purchases",
@@ -61,22 +63,21 @@ func ExampleObject_ElapsedTime() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
-	}(time.Now())
+	}(start)
 
 	time.Sleep(100 * time.Millisecond)
 
 	// Output example:
-	// # HELP ExampleElapsedTime_test_response_histogram Histogram for: response
-	// # TYPE ExampleElapsedTime_test_response_histogram histogram
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.05"} 0
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.1"} 0
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.15000000000000002"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.2"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="0.25"} 1
-	// ExampleElapsedTime_test_response_histogram_bucket{handler="purchases",le="+Inf"} 1
-	// ExampleElapsedTime_test_response_histogram_sum{handler="purchases"} 0.100382976
-	// ExampleElapsedTime_test_response_histogram_count{handler="purchases"} 1
+	// # HELP get_stat Histogram for: get_stat
+	// # TYPE get_stat histogram
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.15000000000000002"} 1
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.2"} 1
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.25"} 1
+	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="+Inf"} 1
+	// get_stat_sum{app="ExampleElapsedTime",env="test",handler="purchases"} 0.100132995
+	// get_stat_count{app="ExampleElapsedTime",env="test",handler="purchases"} 1
 }
 
 func ExampleGenerateUnits() {

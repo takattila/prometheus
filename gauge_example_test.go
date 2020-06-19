@@ -14,20 +14,20 @@ func ExampleObject_Gauge() {
 		AppName:     "ExampleGauge",
 	})
 
-	err := p.Gauge("cpu", []prometheus.Label{
+	err := p.Gauge("cpu_usage", []prometheus.Label{
 		{
-			Name:  "usage",
-			Value: "percentage",
+			Name:  "core",
+			Value: "0",
 		},
 	}, 15)
 
 	fmt.Println()
-	fmt.Println(p.GetMetrics("ExampleGauge"))
+	fmt.Println(p.GetMetrics("cpu_usage"))
 	fmt.Println("Error:", err)
 
 	// Output:
-	// # HELP ExampleGauge_test_cpu_gauge Gauge for: cpu
-	// # TYPE ExampleGauge_test_cpu_gauge gauge
-	// ExampleGauge_test_cpu_gauge{usage="percentage"} 15
+	// # HELP cpu_usage Gauge for: cpu_usage
+	// # TYPE cpu_usage gauge
+	// cpu_usage{app="ExampleGauge",core="0",env="test"} 15
 	// Error: <nil>
 }

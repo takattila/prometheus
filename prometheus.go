@@ -48,7 +48,7 @@ func New(i Init) *Object {
 	}
 
 	o.StartHttpServer()
-	o.countGoroutines()
+	o.statCountGoroutines()
 
 	return o
 }

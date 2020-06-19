@@ -15,7 +15,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 	// 1. Create new object and stert the HTTP server paralel.
 	p := New(initProm("TestStartHttpServer"))
 
-	p.Counter("example", []Label{
+	p.Counter("example_start_http_server", []Label{
 		{
 			Name:  "foo1",
 			Value: "bar1",
@@ -26,7 +26,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 		},
 	}, 1)
 
-	expected := `TestStartHttpServer_test_example_counter{foo1="bar1",foo2="bar2"} 1`
+	expected := `example_start_http_server{app="TestStartHttpServer",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual := p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expected))
@@ -35,7 +35,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 	p.StopHttpServer()
 	p.StartHttpServer()
 
-	expected = `TestStartHttpServer_test_example_counter{foo1="bar1",foo2="bar2"} 1`
+	expected = `example_start_http_server{app="TestStartHttpServer",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual = p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expected))
