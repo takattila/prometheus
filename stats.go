@@ -23,14 +23,8 @@ func (o *Object) statMemoryUsage() {
 	if o.StatMemoryUsage {
 		t := time.NewTicker(time.Second)
 
-		//byteToMB := func(b uint64) uint64 {
-		//	return b / 1024 / 1024
-		//}
-
 		go func() {
 			for range t.C {
-				// var m runtime.MemStats
-				// runtime.ReadMemStats(&m)
 				m, _ := mem.VirtualMemory()
 				_ = o.Gauge("stat_memory_usage:total", []Label{}, float64(m.Total))
 				_ = o.Gauge("stat_memory_usage:avail", []Label{}, float64(m.Available))
