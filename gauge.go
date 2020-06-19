@@ -2,8 +2,6 @@ package prometheus
 
 import (
 	"fmt"
-	"runtime"
-	"time"
 
 	kitProm "github.com/go-kit/kit/metrics/prometheus"
 	clientGo "github.com/prometheus/client_golang/prometheus"
@@ -38,52 +36,4 @@ func (o *Object) Gauge(metricName string, labels []Label, value float64) (err er
 
 	o.gauges[metricName].With(makeSlice(labels)...).Set(value)
 	return
-}
-
-func (o *Object) statCountGoroutines() {
-	if o.StatCountGoroutines {
-		t := time.NewTicker(time.Second)
-		go func() {
-			for range t.C {
-				_ = o.Gauge("stat_count_goroutines", []Label{}, float64(runtime.NumGoroutine()))
-			}
-		}()
-	}
-}
-
-func (o *Object) statMemoryUsage() {
-	if o.StatMemoryUsage {
-		t := time.NewTicker(time.Second)
-
-		m := runtime.MemStats{}
-		runtime.ReadMemStats(&m)
-
-		byteToMB := func(b uint64) uint64 {
-			return b / 1024 / 1024
-		}
-
-		go func() {
-			for range t.C {
-				_ = o.Gauge("stat_memory_usage:alloc", []Label{}, float64(byteToMB(m.Alloc)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				_ = o.Gauge("stat_memory_usage:total", []Label{}, float64(byteToMB(m.TotalAlloc)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				_ = o.Gauge("stat_memory_usage:sys", []Label{}, float64(byteToMB(m.Sys)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				_ = o.Gauge("stat_memory_usage:gc", []Label{}, float64(m.NumGC))
-			}
-		}()
-	}
 }

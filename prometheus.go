@@ -18,6 +18,7 @@ type Init struct {
 
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
+	StatCpuUsage        bool
 }
 
 // Label used by metric types: Counter, Histogram, Gauge
@@ -34,6 +35,7 @@ type Object struct {
 
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
+	StatCpuUsage        bool
 
 	counters   map[string]kitMet.Counter
 	histograms map[string]kitMet.Histogram
@@ -50,6 +52,7 @@ func New(i Init) *Object {
 
 		StatCountGoroutines: i.StatCountGoroutines,
 		StatMemoryUsage:     i.StatMemoryUsage,
+		StatCpuUsage:        i.StatCpuUsage,
 
 		counters:   make(map[string]kitMet.Counter),
 		histograms: make(map[string]kitMet.Histogram),
@@ -59,6 +62,7 @@ func New(i Init) *Object {
 	o.StartHttpServer()
 	o.statCountGoroutines()
 	o.statMemoryUsage()
+	o.statCpuUsage()
 
 	return o
 }

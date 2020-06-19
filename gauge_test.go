@@ -58,42 +58,6 @@ func (s gaugeSuite) TestGaugeError() {
 	p.StopHttpServer()
 }
 
-func (s gaugeSuite) TestStatCountGoroutines() {
-	p := New(initProm("TestStatCountGoroutines"))
-
-	expected := "stat_count_goroutines"
-	actual := ""
-	for {
-		actual = p.GetMetrics(expected)
-		if strings.Contains(actual, expected) {
-			break
-		}
-	}
-
-	s.Equal(true, strings.Contains(actual, expected))
-	p.StopHttpServer()
-}
-
-func (s gaugeSuite) TestStatMemoryUsage() {
-	p := New(initProm("TestStatMemoryUsage"))
-
-	for _, t := range []string{"alloc", "total", "sys", "gc"} {
-
-		expected := "stat_memory_usage:" + t
-		actual := ""
-		for {
-			actual = p.GetMetrics(expected)
-			if strings.Contains(actual, expected) {
-				break
-			}
-		}
-
-		s.Equal(true, strings.Contains(actual, expected))
-
-	}
-	p.StopHttpServer()
-}
-
 func TestGaugeSuite(t *testing.T) {
 	suite.Run(t, new(gaugeSuite))
 }
