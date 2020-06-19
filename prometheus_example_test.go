@@ -9,17 +9,30 @@ import (
 
 func ExampleNew() {
 	p := prometheus.New(prometheus.Init{
+		// Obligatory fields
 		Host:        "0.0.0.0",
 		Port:        prometheus.GetFreePort(),
 		Environment: "test",
-		AppName:     "ExampleHistogram",
+		AppName:     "ExampleService",
+
+		// Optional fields
+		StatCountGoroutines: true, // default: false
+		StatMemoryUsage:     true, // default: false
+		StatCpuUsage:        true, // default: false
 	})
 
-	b, _ := json.Marshal(p)
+	b, _ := json.MarshalIndent(p, "", "  ")
 	fmt.Println(string(b))
 
 	// Output example:
-	// {"Addr":"0.0.0.0:34551","Env":"test","App":"ExampleHistogram"}
+	// {
+	//   "Addr": "0.0.0.0:38033",
+	//   "Env": "test",
+	//   "App": "ExampleService",
+	//   "StatCountGoroutines": true,
+	//   "StatMemoryUsage": true,
+	//   "StatCpuUsage": true
+	// }
 }
 
 func ExampleObject_StartHttpServer() {
