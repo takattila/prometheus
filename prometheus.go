@@ -46,7 +46,10 @@ func New(i Init) *Object {
 		histograms: make(map[string]kitMet.Histogram),
 		gauges:     make(map[string]kitMet.Gauge),
 	}
+
 	o.StartHttpServer()
+	o.countGoroutines()
+
 	return o
 }
 

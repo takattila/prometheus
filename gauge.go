@@ -2,6 +2,8 @@ package prometheus
 
 import (
 	"fmt"
+	"runtime"
+	"time"
 
 	kitProm "github.com/go-kit/kit/metrics/prometheus"
 	clientGo "github.com/prometheus/client_golang/prometheus"
@@ -36,4 +38,22 @@ func (o *Object) Gauge(metricName string, labels []Label, value float64) (err er
 
 	o.gauges[fqdn].With(makeSlice(labels)...).Set(value)
 	return
+}
+
+func (o *Object) countGoroutines() {
+	t := time.NewTicker(time.Second)
+	go func() {
+		for range t.C {
+			o.Gauge("goroutines", []Label{
+				{
+					Name:  "app",
+					Value: o.App,
+				},
+				{
+					Name:  "env",
+					Value: o.Env,
+				},
+			}, float64(runtime.NumGoroutine()))
+		}
+	}()
 }
