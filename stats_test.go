@@ -31,7 +31,7 @@ func (s statsSuite) TestStatCountGoroutines() {
 func (s statsSuite) TestStatMemoryUsage() {
 	p := New(initProm("TestStatMemoryUsage"))
 
-	for _, t := range []string{"alloc", "total", "sys", "gc"} {
+	for _, t := range []string{"total", "avail", "used", "free", "used_percent"} {
 
 		expected := "stat_memory_usage:" + t
 		actual := ""

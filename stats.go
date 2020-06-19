@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/mem"
 )
 
 func (o *Object) statCountGoroutines() {
@@ -22,37 +23,20 @@ func (o *Object) statMemoryUsage() {
 	if o.StatMemoryUsage {
 		t := time.NewTicker(time.Second)
 
-		byteToMB := func(b uint64) uint64 {
-			return b / 1024 / 1024
-		}
-
-		m := runtime.MemStats{}
+		//byteToMB := func(b uint64) uint64 {
+		//	return b / 1024 / 1024
+		//}
 
 		go func() {
 			for range t.C {
-				runtime.ReadMemStats(&m)
-				_ = o.Gauge("stat_memory_usage:alloc", []Label{}, float64(byteToMB(m.Alloc)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				runtime.ReadMemStats(&m)
-				_ = o.Gauge("stat_memory_usage:total", []Label{}, float64(byteToMB(m.TotalAlloc)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				runtime.ReadMemStats(&m)
-				_ = o.Gauge("stat_memory_usage:sys", []Label{}, float64(byteToMB(m.Sys)))
-			}
-		}()
-
-		go func() {
-			for range t.C {
-				runtime.ReadMemStats(&m)
-				_ = o.Gauge("stat_memory_usage:gc", []Label{}, float64(m.NumGC))
+				// var m runtime.MemStats
+				// runtime.ReadMemStats(&m)
+				m, _ := mem.VirtualMemory()
+				_ = o.Gauge("stat_memory_usage:total", []Label{}, float64(m.Total))
+				_ = o.Gauge("stat_memory_usage:avail", []Label{}, float64(m.Available))
+				_ = o.Gauge("stat_memory_usage:used", []Label{}, float64(m.Used))
+				_ = o.Gauge("stat_memory_usage:free", []Label{}, float64(m.Free))
+				_ = o.Gauge("stat_memory_usage:used_percent", []Label{}, float64(m.UsedPercent))
 			}
 		}()
 	}
