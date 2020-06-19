@@ -2,6 +2,7 @@
 package prometheus
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"net/http"
@@ -41,9 +42,8 @@ type Object struct {
 
 // New creates a new Object structure.
 func New(i Init) *Object {
-	addr := fmt.Sprintf("%s:%d", i.Host, i.Port)
 	o := &Object{
-		Addr: addr,
+		Addr: fmt.Sprintf("%s:%d", i.Host, i.Port),
 		Env:  i.Environment,
 		App:  i.AppName,
 
@@ -68,7 +68,7 @@ func (o *Object) StopHttpServer() {
 
 // GetMetrics queries all metrics data which matches to 'text' string.
 func (o *Object) GetMetrics(text string) string {
-	return grep(text, o.getMetrics())
+	return Grep(text, o.getMetrics())
 }
 
 // ParseOutput reads 'text' as the simple and flat text-based
@@ -81,8 +81,8 @@ func ParseOutput(text string) map[string]*dto.MetricFamily {
 
 // GetLabels gives back the labels for a metric.
 func GetLabels(text, metric string) (labels []Label) {
-	p := ParseOutput(text)
-	obj := p[metric]
+	out := ParseOutput(text)
+	obj := out[metric]
 
 	for _, m := range obj.GetMetric() {
 		for _, l := range m.GetLabel() {
@@ -98,5 +98,17 @@ func GetLabels(text, metric string) (labels []Label) {
 // GetFreePort asks the kernel for a free open port that is ready to use.
 func GetFreePort() (port int) {
 	port, _ = freeport.GetFreePort()
+	return
+}
+
+// Grep processes text line by line,
+// and gives back any lines which match a specified word.
+func Grep(find, inText string) (result string) {
+	scanner := bufio.NewScanner(strings.NewReader(inText))
+	for scanner.Scan() {
+		if strings.Contains(strings.ToLower(scanner.Text()), strings.ToLower(find)) {
+			result += "\n" + scanner.Text()
+		}
+	}
 	return
 }

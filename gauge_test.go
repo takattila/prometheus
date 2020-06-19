@@ -25,7 +25,7 @@ func (s gaugeSuite) TestGauge() {
 		s.Equal(nil, err)
 
 		expected := `TestGauge_test_example_gauge{foo1="bar1"} ` + fmt.Sprintf("%g", value)
-		actual := grep(p.App, p.getMetrics())
+		actual := p.GetMetrics(p.App)
 
 		s.Equal(true, strings.Contains(actual, expected))
 	}

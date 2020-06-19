@@ -1,7 +1,6 @@
 package prometheus
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -27,16 +26,6 @@ func (o *Object) serve() *http.Server {
 	go func() { _ = s.ListenAndServe() }()
 
 	return s
-}
-
-func grep(grep, text string) (result string) {
-	scanner := bufio.NewScanner(strings.NewReader(text))
-	for scanner.Scan() {
-		if strings.Contains(strings.ToLower(scanner.Text()), strings.ToLower(grep)) {
-			result += "\n" + scanner.Text()
-		}
-	}
-	return
 }
 
 func (o *Object) getMetrics() string {

@@ -28,7 +28,7 @@ func (s counterSuite) TestCounter() {
 	s.Equal(nil, err)
 
 	expected := `TestCounter_test_example_counter{foo1="bar1",foo2="bar2"} 1`
-	actual := grep(p.App, p.getMetrics())
+	actual := p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expected))
 

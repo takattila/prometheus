@@ -30,7 +30,7 @@ func (s histogramSuite) TestHistogram() {
 
 	for _, unit := range GenerateUnits(0.5, 0.5, 20) {
 		expected := `TestHistogram_test_example_histogram_bucket{foo1="bar1",foo2="bar2",le="` + fmt.Sprintf("%g", unit) + `"} 1`
-		actual := grep(p.App, p.getMetrics())
+		actual := p.GetMetrics(p.App)
 
 		s.Equal(true, strings.Contains(actual, expected))
 	}
@@ -38,7 +38,7 @@ func (s histogramSuite) TestHistogram() {
 	expectedSum := `TestHistogram_test_example_histogram_sum{foo1="bar1",foo2="bar2"}`
 	expectedCount := `TestHistogram_test_example_histogram_count{foo1="bar1",foo2="bar2"} 1`
 
-	actual := grep(p.App, p.getMetrics())
+	actual := p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expectedSum))
 	s.Equal(true, strings.Contains(actual, expectedCount))
@@ -66,7 +66,7 @@ func (s histogramSuite) TestElapsedTime() {
 
 		for _, unit := range buckets {
 			expected := `TestElapsedTime_test_example_histogram_bucket{foo1="bar1",le="` + fmt.Sprintf("%g", unit) + `"}`
-			actual := grep(p.App, output)
+			actual := Grep(p.App, output)
 
 			s.Equal(true, strings.Contains(actual, expected))
 		}
@@ -74,7 +74,7 @@ func (s histogramSuite) TestElapsedTime() {
 		expectedSum := `TestElapsedTime_test_example_histogram_sum{foo1="bar1"}`
 		expectedCount := `TestElapsedTime_test_example_histogram_count{foo1="bar1"} 1`
 
-		actual := grep(p.App, output)
+		actual := Grep(p.App, output)
 
 		s.Equal(true, strings.Contains(actual, expectedSum))
 		s.Equal(true, strings.Contains(actual, expectedCount))

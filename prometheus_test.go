@@ -27,7 +27,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 	}, 1)
 
 	expected := `TestStartHttpServer_test_example_counter{foo1="bar1",foo2="bar2"} 1`
-	actual := grep(p.App, p.getMetrics())
+	actual := p.GetMetrics(p.App)
 
 	s.Equal(true, strings.Contains(actual, expected))
 
@@ -36,7 +36,9 @@ func (s prometheusSuite) TestStartHttpServer() {
 	p.StartHttpServer()
 
 	expected = `TestStartHttpServer_test_example_counter{foo1="bar1",foo2="bar2"} 1`
-	actual = grep(p.App, p.getMetrics())
+	actual = p.GetMetrics(p.App)
+
+	s.Equal(true, strings.Contains(actual, expected))
 
 	// 3. Everything is alright, shutting down the server.
 	p.StopHttpServer()
