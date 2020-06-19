@@ -18,6 +18,7 @@ func initProm(appName string) Init {
 		AppName:     appName,
 
 		StatCountGoroutines: true,
+		StatMemoryUsage:     true,
 	}
 }
 
