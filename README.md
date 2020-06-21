@@ -5,14 +5,33 @@
 [![GOdoc](https://img.shields.io/badge/godoc-reference-orange)](https://godoc.org/github.com/takattila/prometheus)
 [![Version](https://img.shields.io/badge/dynamic/json.svg?label=version&url=https://api.github.com/repos/takattila/prometheus/releases/latest&query=tag_name)](https://github.com/takattila/prometheus/releases)
 
-The prometheus package provides Prometheus implementations for metrics.
-It provides statistics as well:
-
-- Goroutines (count)
-- Memory usage (bytes)
-- CPU usage (percentage)
+This package is a Prometheus implementation for metrics.
 
 ![prometheus screenshot](./img/screenshot-01.png)
+
+It **provides statistics** as well:
+
+- **Goroutines** (count)
+- **Memory** usage (bytes)
+
+  - **System**:
+  
+    - `Total`: total amount of RAM on this system
+    - `Avail`: RAM available for programs to allocate
+    - `Used` (bytes): RAM used by programs
+    - `Free`: this is the kernel's notion of free memory
+    - `Used` (percent): percentage of RAM used by programs
+    
+  - **Used by the application**:
+  
+    - `Sys`: the total bytes of memory obtained from the OS
+    - `Alloc`: bytes of allocated heap objects
+    - `HeapSys`: bytes of heap memory obtained from the OS
+    - `HeapInuse`: bytes in in-use spans
+    - `NumGC`: the number of completed GC cycles
+
+- **CPU** usage (percentage)
+
 
 ## Table of contents
 
@@ -76,7 +95,11 @@ p := prometheus.New(prometheus.Init{
 [Back to top](#table-of-contents)
 
 ### Counter
+Counter is a cumulative metric that represents a single monotonically increasing counter
+whose value can only increase or be reset to zero on restart.
 
+For example, you can use a counter to represent the number
+of requests served, tasks completed, or errors.
 #### Example code
 
 ```go
@@ -101,6 +124,12 @@ response_status{app="ExampleCounter",env="test",handler="MyHandler1",statuscode=
 [Back to top](#table-of-contents)
 
 ### Gauge
+Gauge is a metric that represents a single numerical value
+that can arbitrarily go up and down.
+
+Gauges are typically used for measured values like temperatures
+or current memory usage, but also "counts" that can go up and down,
+like the number of concurrent requests.
 
 #### Example code
 
@@ -125,6 +154,17 @@ cpu_usage{app="ExampleGauge",core="0",env="test"} 15
 [Back to top](#table-of-contents)
 
 ### Histogram
+Histogram samples observations (usually things like request durations
+or response sizes) and counts them in configurable buckets.
+It also provides a sum of all observed values.
+A histogram with a base metric name of <basename>
+exposes multiple time series during a scrape:
+
+  - cumulative counters for the observation buckets, exposed
+    as <basename>_bucket{le="<upper inclusive bound>"}
+  - the total sum of all observed values, exposed as <basename>_sum
+  - the count of events that have been observed, exposed
+    as <basename>_count (identical to <basename>_bucket{le="+Inf"} above)
 
 #### Example code
 
@@ -156,6 +196,7 @@ history_bucket{app="ExampleHistogram",env="test",sell="actual",le="+Inf"} 1
 [Back to top](#table-of-contents)
 
 ### Elapsed time
+Place this code bellow to measure the computation time of a given function, handler, etc.
 
 #### Example code
 
@@ -201,3 +242,5 @@ get_stat_count{app="ExampleElapsedTime",env="test",handler="purchases"} 1
 For more examples, please visit: [godoc page](https://godoc.org/github.com/takattila/prometheus#pkg-examples) .
 
 [Back to top](#table-of-contents)
+
+![prometheus screenshot](./img/screenshot-02.png)
