@@ -16,9 +16,10 @@ func ExampleNew() {
 		AppName:     "ExampleService",
 
 		// Optional fields
-		StatCountGoroutines: true, // default: false
-		StatMemoryUsage:     true, // default: false
-		StatCpuUsage:        true, // default: false
+		MetricEndpoint:      "/metrics", // default: /metrics
+		StatCountGoroutines: true,       // default: false
+		StatMemoryUsage:     true,       // default: false
+		StatCpuUsage:        true,       // default: false
 	})
 
 	b, _ := json.MarshalIndent(p, "", "  ")
@@ -26,13 +27,15 @@ func ExampleNew() {
 
 	// Output example:
 	// {
-	//   "Addr": "0.0.0.0:38033",
-	//   "Env": "test",
-	//   "App": "ExampleService",
-	//   "StatCountGoroutines": true,
-	//   "StatMemoryUsage": true,
-	//   "StatCpuUsage": true
+	// 	"Addr": "0.0.0.0:40045",
+	// 	"Env": "test",
+	// 	"App": "ExampleService",
+	// 	"MetricsEndpoint": "/metrics",
+	// 	"StatCountGoroutines": true,
+	// 	"StatMemoryUsage": true,
+	// 	"StatCpuUsage": true
 	// }
+
 }
 
 func ExampleObject_StartHttpServer() {

@@ -16,12 +16,9 @@ func (s gaugeSuite) TestGauge() {
 	p := New(initProm("TestGauge"))
 
 	for _, value := range []float64{5, 2, 19, 77} {
-		err := p.Gauge("example_gauge", []Label{
-			{
-				Name:  "foo1",
-				Value: "bar1",
-			},
-		}, value)
+		err := p.Gauge("example_gauge", value, Labels{
+			"foo1": "bar1",
+		})
 		s.Equal(nil, err)
 
 		expected := `example_gauge{app="TestGauge",env="test",foo1="bar1"} ` + fmt.Sprintf("%g", value)
@@ -36,23 +33,17 @@ func (s gaugeSuite) TestGauge() {
 func (s gaugeSuite) TestGaugeError() {
 	p := New(initProm("TestGaugeError"))
 
-	err := p.Gauge("example_gauge_error", []Label{
-		{
-			Name:  "foo1",
-			Value: "bar1",
-		},
-	}, 60)
+	err := p.Gauge("example_gauge_error", 60, Labels{
+		"foo1": "bar1",
+	})
 	s.Equal(nil, err)
 
-	actual := p.Gauge("example_gauge_error", []Label{
-		{
-			Name:  "bad_label",
-			Value: "bar1",
-		},
-	}, 50)
+	actual := p.Gauge("example_gauge_error", 50, Labels{
+		"bad_label": "bar1",
+	})
 
 	// Bad label name
-	expected := `metric: 'example_gauge_error', error: 'label name "foo1" missing in label map', input label names: 'bad_label, app, env', correct label names: 'app, env, foo1'` + "\n"
+	expected := `metric: 'example_gauge_error', error: 'label name "foo1" missing in label map', input label names: 'app, bad_label, env', correct label names: 'app, env, foo1'` + "\n"
 	s.Equal(expected, fmt.Sprint(actual))
 
 	p.StopHttpServer()

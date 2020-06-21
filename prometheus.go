@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	kitMet "github.com/go-kit/kit/metrics"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 // Init is used for prometheus Object initialization.
@@ -16,15 +16,10 @@ type Init struct {
 	Environment string
 	AppName     string
 
+	MetricEndpoint      string
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
 	StatCpuUsage        bool
-}
-
-// Label used by metric types: Counter, Histogram, Gauge
-type Label struct {
-	Name  string
-	Value string
 }
 
 // Object provides structure to use metric types.
@@ -33,14 +28,26 @@ type Object struct {
 	Env  string
 	App  string
 
+	MetricsEndpoint     string
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
 	StatCpuUsage        bool
 
-	counters   map[string]kitMet.Counter
-	histograms map[string]kitMet.Histogram
-	gauges     map[string]kitMet.Gauge
+	counters   map[string]*prometheus.CounterVec
+	gauges     map[string]*prometheus.GaugeVec
+	histograms map[string]*prometheus.HistogramVec
 	server     *http.Server
+	reg        *prometheus.Registry
+}
+
+// Label used by metric types: Counter, Histogram, Gauge
+type Labels prometheus.Labels
+
+func (i Init) setMetricsEndpoint() string {
+	if i.MetricEndpoint == "" {
+		return "/metrics"
+	}
+	return i.MetricEndpoint
 }
 
 // New creates a new Object structure.
@@ -50,13 +57,15 @@ func New(i Init) *Object {
 		Env:  i.Environment,
 		App:  i.AppName,
 
+		MetricsEndpoint:     i.setMetricsEndpoint(),
 		StatCountGoroutines: i.StatCountGoroutines,
 		StatMemoryUsage:     i.StatMemoryUsage,
 		StatCpuUsage:        i.StatCpuUsage,
 
-		counters:   make(map[string]kitMet.Counter),
-		histograms: make(map[string]kitMet.Histogram),
-		gauges:     make(map[string]kitMet.Gauge),
+		counters:   make(map[string]*prometheus.CounterVec),
+		gauges:     make(map[string]*prometheus.GaugeVec),
+		histograms: make(map[string]*prometheus.HistogramVec),
+		reg:        prometheus.NewRegistry(),
 	}
 
 	o.StartHttpServer()

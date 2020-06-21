@@ -19,6 +19,7 @@ func initProm(appName string) Init {
 
 		StatCountGoroutines: true,
 		StatMemoryUsage:     true,
+		StatCpuUsage:        true,
 	}
 }
 
@@ -30,18 +31,9 @@ func (s commonSuite) TestGenerateUnits() {
 
 func (s commonSuite) TestGetLabelNames() {
 	expected := []string{"foo1", "foo2"}
-	actual := getLabelNames([]Label{
-		{Name: "foo1", Value: "bar1"},
-		{Name: "foo2", Value: "bar2"},
-	})
-	s.Equal(expected, actual)
-}
-
-func (s commonSuite) TestMakeSlice() {
-	expected := []string{"foo1", "bar1", "foo2", "bar2"}
-	actual := makeSlice([]Label{
-		{Name: "foo1", Value: "bar1"},
-		{Name: "foo2", Value: "bar2"},
+	actual := getLabelNames(Labels{
+		"foo1": "bar1",
+		"foo2": "bar2",
 	})
 	s.Equal(expected, actual)
 }

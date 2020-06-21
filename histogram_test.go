@@ -16,16 +16,11 @@ type histogramSuite struct {
 func (s histogramSuite) TestHistogram() {
 	p := New(initProm("TestHistogram"))
 
-	err := p.Histogram("example_histogram", []Label{
-		{
-			Name:  "foo1",
-			Value: "bar1",
-		},
-		{
-			Name:  "foo2",
-			Value: "bar2",
-		},
-	}, time.Since(time.Now()).Seconds(), GenerateUnits(0.5, 0.5, 20)...)
+	begin := time.Since(time.Now()).Seconds()
+	err := p.Histogram("example_histogram", begin, Labels{
+		"foo1": "bar1",
+		"foo2": "bar2",
+	}, GenerateUnits(0.5, 0.5, 20)...)
 	s.Equal(nil, err)
 
 	for _, unit := range GenerateUnits(0.5, 0.5, 20) {
@@ -53,12 +48,9 @@ func (s histogramSuite) TestElapsedTime() {
 
 		buckets := GenerateUnits(0.02, 0.02, 10)
 
-		err := p.ElapsedTime("example_elapsed_time", []Label{
-			{
-				Name:  "foo1",
-				Value: "bar1",
-			},
-		}, begin, buckets...)
+		err := p.ElapsedTime("example_elapsed_time", begin, Labels{
+			"foo1": "bar1",
+		}, buckets...)
 
 		s.Equal(nil, err)
 
@@ -89,27 +81,20 @@ func (s histogramSuite) TestElapsedTime() {
 func (s histogramSuite) TestHistogramError() {
 	p := New(initProm("TestHistogramError"))
 
-	err := p.Histogram("example_histogram_error", []Label{
-		{
-			Name:  "foo1",
-			Value: "bar1",
-		},
-		{
-			Name:  "foo2",
-			Value: "bar2",
-		},
-	}, time.Since(time.Now()).Seconds())
+	begin := time.Since(time.Now()).Seconds()
+	err := p.Histogram("example_histogram_error", begin, Labels{
+		"foo1": "bar1",
+		"foo2": "bar2",
+	})
 	s.Equal(nil, err)
 
 	// Missing label name
-	err = p.Histogram("example_histogram_error", []Label{
-		{
-			Name:  "foo1",
-			Value: "bar1",
-		},
-	}, time.Since(time.Now()).Seconds())
+	begin = time.Since(time.Now()).Seconds()
+	err = p.Histogram("example_histogram_error", begin, Labels{
+		"foo1": "bar1",
+	})
 
-	expected := `metric: 'example_histogram_error', error: 'inconsistent label cardinality: expected 4 label values but got 3 in prometheus.Labels{"app":"TestHistogramError", "env":"test", "foo1":"bar1"}', input label names: 'foo1, app, env', correct label names: 'app, env, foo1, foo2'` + "\n"
+	expected := `metric: 'example_histogram_error', error: 'inconsistent label cardinality: expected 4 label values but got 3 in prometheus.Labels{"app":"TestHistogramError", "env":"test", "foo1":"bar1"}', input label names: 'app, env, foo1', correct label names: 'app, env, foo1, foo2'` + "\n"
 	s.Equal(expected, fmt.Sprint(err))
 
 	p.StopHttpServer()

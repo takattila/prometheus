@@ -14,23 +14,17 @@ func ExampleObject_Counter() {
 		AppName:     "ExampleCounter",
 	})
 
-	err := p.Counter("response_status", []prometheus.Label{
-		{
-			Name:  "handler",
-			Value: "MyHandler1",
-		},
-		{
-			Name:  "statuscode",
-			Value: "200",
-		},
-	}, 1)
+	err := p.Counter("response_status", 1, prometheus.Labels{
+		"handler":    "MyHandler1",
+		"statuscode": "200",
+	})
 
 	fmt.Println()
 	fmt.Println(p.GetMetrics("response_status"))
 	fmt.Println("Error:", err)
 
 	// Output:
-	// # HELP response_status Counter for: response_status
+	// # HELP response_status Counter created for response_status
 	// # TYPE response_status counter
 	// response_status{app="ExampleCounter",env="test",handler="MyHandler1",statuscode="200"} 1
 	// Error: <nil>

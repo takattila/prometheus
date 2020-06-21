@@ -19,12 +19,9 @@ func ExampleObject_Histogram() {
 	since := time.Since(time.Now()).Seconds()
 	units := prometheus.GenerateUnits(1, 1, 5)
 
-	err := p.Histogram("history", []prometheus.Label{
-		{
-			Name:  "sell",
-			Value: "actual",
-		},
-	}, since, units...)
+	err := p.Histogram("history", since, prometheus.Labels{
+		"sell": "actual",
+	}, units...)
 
 	fmt.Println()
 	fmt.Println(p.GetMetrics("history_bucket"))
@@ -53,12 +50,9 @@ func ExampleObject_ElapsedTime() {
 	defer func(begin time.Time) {
 		units := prometheus.GenerateUnits(0.05, 0.05, 5)
 
-		err := p.ElapsedTime("get_stat", []prometheus.Label{
-			{
-				Name:  "handler",
-				Value: "purchases",
-			},
-		}, begin, units...)
+		err := p.ElapsedTime("get_stat", begin, prometheus.Labels{
+			"handler": "purchases",
+		}, units...)
 
 		if err != nil {
 			log.Fatal(err)
@@ -68,7 +62,7 @@ func ExampleObject_ElapsedTime() {
 	time.Sleep(100 * time.Millisecond)
 
 	// Output example:
-	// # HELP get_stat Histogram for: get_stat
+	// # HELP get_stat Histogram created for get_stat
 	// # TYPE get_stat histogram
 	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
 	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0

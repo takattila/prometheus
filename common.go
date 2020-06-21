@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/http/pprof"
+	"sort"
 	"strings"
 	"time"
 
@@ -13,7 +15,6 @@ import (
 
 func (o *Object) serve() *http.Server {
 	r := chi.NewRouter()
-	r.Handle("/*", promhttp.Handler())
 
 	s := &http.Server{
 		Addr:           o.Addr,
@@ -21,6 +22,29 @@ func (o *Object) serve() *http.Server {
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
+	}
+
+	r.Handle(o.MetricsEndpoint, promhttp.HandlerFor(
+		o.reg, promhttp.HandlerOpts{
+			DisableCompression:  true,
+			MaxRequestsInFlight: 1,
+			EnableOpenMetrics:   true,
+		}))
+
+	r.HandleFunc("/debug/pprof/", pprof.Index)
+
+	for _, pp := range []string{
+		"allocs",
+		"block",
+		"cmdline",
+		"goroutine",
+		"heap",
+		"mutex",
+		"profile",
+		"threadcreate",
+		"trace",
+	} {
+		r.Handle("/debug/pprof/"+pp+"", pprof.Handler((pp)))
 	}
 
 	go func() { _ = s.ListenAndServe() }()
@@ -33,38 +57,33 @@ func (o *Object) getMetrics() string {
 	var err error
 
 	for {
-		resp, err = http.Get("http://" + o.Addr)
+		resp, err = http.Get("http://" + o.Addr + o.MetricsEndpoint)
 		if err == nil {
 			break
 		}
 	}
 
+	defer func() { _ = resp.Body.Close() }()
 	buf, _ := ioutil.ReadAll(resp.Body)
 
 	return string(buf)
 }
 
-func getLabelNames(labels []Label) []string {
+func getLabelNames(labels Labels) []string {
 	var slice []string
-	for _, o := range labels {
-		slice = append(slice, o.Name)
-	}
-	return slice
-}
-
-func makeSlice(labels []Label) []string {
-	var slice []string
-	for _, o := range labels {
-		slice = append(slice, o.Name, o.Value)
+	for k := range labels {
+		slice = append(slice, k)
 	}
 	return slice
 }
 
 func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []string) error {
 	metric := o.GetMetrics(fqdn)
+	sort.Strings(inputLabelNames)
 	givenLabelNames := strings.Join(inputLabelNames, ", ")
 	correctLabelNames := func() (ret string) {
 		ln := getLabelNames(GetLabels(metric, fqdn))
+		sort.Strings(ln)
 		if len(ln) != 0 {
 			ret = fmt.Sprintf(", correct label names: '%s'", strings.Join(ln, ", "))
 		}
@@ -78,8 +97,8 @@ func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []st
 		correctLabelNames())
 }
 
-func (o *Object) addServiceInfoToLabels(labels []Label) []Label {
-	return append(labels,
-		Label{Name: "app", Value: o.App},
-		Label{Name: "env", Value: o.Env})
+func (o *Object) addServiceInfoToLabels(labels Labels) Labels {
+	labels["app"] = o.App
+	labels["env"] = o.Env
+	return labels
 }

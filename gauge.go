@@ -1,10 +1,8 @@
 package prometheus
 
 import (
-	"fmt"
-
-	kitProm "github.com/go-kit/kit/metrics/prometheus"
-	clientGo "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // Gauge is a metric that represents a single numerical value
@@ -13,27 +11,21 @@ import (
 // Gauges are typically used for measured values like temperatures
 // or current memory usage, but also "counts" that can go up and down,
 // like the number of concurrent requests.
-func (o *Object) Gauge(metricName string, labels []Label, value float64) (err error) {
+func (o *Object) Gauge(metricName string, value float64, labels Labels) (err error) {
 	labels = o.addServiceInfoToLabels(labels)
-	labelNames := getLabelNames(labels)
-
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, metricName, labelNames)
+			err = o.errorHandler(r, metricName, getLabelNames(labels))
 		}
 	}()
-
 	if o.gauges[metricName] == nil {
-		o.gauges[metricName] = kitProm.NewGaugeFrom(clientGo.GaugeOpts{
-			Name:        metricName,
-			Help:        fmt.Sprintf("Gauge for: %s", metricName),
-			ConstLabels: clientGo.Labels{},
-		}, labelNames)
-
-		o.gauges[metricName].With(makeSlice(labels)...).Add(value)
+		o.gauges[metricName] = promauto.With(o.reg).NewGaugeVec(prometheus.GaugeOpts{
+			Name: metricName,
+			Help: "Gauge created for " + metricName,
+		}, getLabelNames(labels))
+		o.gauges[metricName].With(prometheus.Labels(labels)).Add(value)
 		return
 	}
-
-	o.gauges[metricName].With(makeSlice(labels)...).Set(value)
+	o.gauges[metricName].With(prometheus.Labels(labels)).Set(value)
 	return
 }

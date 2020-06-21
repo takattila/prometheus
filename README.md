@@ -49,9 +49,10 @@ p := prometheus.New(prometheus.Init{
     AppName:     "ExampleService",
 
     // Optional fields
-    StatCountGoroutines: true, // default: false
-    StatMemoryUsage:     true, // default: false
-    StatCpuUsage:        true, // default: false
+    MetricEndpoint:      "/metrics", // default: /metrics
+    StatCountGoroutines: true,       // default: false
+    StatMemoryUsage:     true,       // default: false
+    StatCpuUsage:        true,       // default: false
 })
 ```
 
@@ -61,13 +62,15 @@ p := prometheus.New(prometheus.Init{
 
 ```json
 {
-  "Addr": "0.0.0.0:38033",
+  "Addr": "0.0.0.0:40045",
   "Env": "test",
   "App": "ExampleService",
+  "MetricsEndpoint": "/metrics",
   "StatCountGoroutines": true,
   "StatMemoryUsage": true,
   "StatCpuUsage": true
 }
+
 ```
 
 [Back to top](#table-of-contents)
@@ -77,16 +80,10 @@ p := prometheus.New(prometheus.Init{
 #### Example code
 
 ```go
-err := p.Counter("response_status", []prometheus.Label{
-    {
-        Name:  "handler",
-        Value: "MyHandler1",
-    },
-    {
-        Name:  "statuscode",
-        Value: "200",
-    },
-}, 1)
+err := p.Counter("response_status", 1, prometheus.Labels{
+    "handler":    "MyHandler1",
+    "statuscode": "200",
+})
 
 fmt.Println(p.GetMetrics("response_status"))
 ```
@@ -96,7 +93,7 @@ fmt.Println(p.GetMetrics("response_status"))
 #### Example output
 
 ```bash
-# HELP response_status Counter for: response_status
+# HELP response_status Counter created for response_status
 # TYPE response_status counter
 response_status{app="ExampleCounter",env="test",handler="MyHandler1",statuscode="200"} 1
 ```
@@ -108,12 +105,9 @@ response_status{app="ExampleCounter",env="test",handler="MyHandler1",statuscode=
 #### Example code
 
 ```go
-err := p.Gauge("cpu_usage", []prometheus.Label{
-    {
-        Name:  "core",
-        Value: "0",
-    },
-}, 15)
+err := p.Gauge("cpu_usage_example", 15, prometheus.Labels{
+    "core": "0",
+})
 
 fmt.Println(p.GetMetrics("cpu_usage"))
 ```
@@ -123,7 +117,7 @@ fmt.Println(p.GetMetrics("cpu_usage"))
 #### Example output
 
 ```bash
-# HELP cpu_usage Gauge for: cpu_usage
+# HELP cpu_usage Gauge created for cpu_usage
 # TYPE cpu_usage gauge
 cpu_usage{app="ExampleGauge",core="0",env="test"} 15
 ```
@@ -138,12 +132,9 @@ cpu_usage{app="ExampleGauge",core="0",env="test"} 15
 since := time.Since(time.Now()).Seconds()
 units := prometheus.GenerateUnits(1, 1, 5)
 
-err := p.Histogram("history", []prometheus.Label{
-    {
-        Name:  "sell",
-        Value: "actual",
-    },
-}, since, units...)
+err := p.Histogram("history", since, prometheus.Labels{
+    "sell": "actual",
+}, units...)
 
 fmt.Println()
 fmt.Println(p.GetMetrics("history_bucket"))
@@ -174,12 +165,9 @@ start := time.Now()
 defer func(begin time.Time) {
     units := prometheus.GenerateUnits(0.05, 0.05, 5)
 
-    err := p.ElapsedTime("get_stat", []prometheus.Label{
-        {
-            Name:  "handler",
-            Value: "purchases",
-        },
-    }, begin, units...)
+    err := p.ElapsedTime("get_stat", begin, prometheus.Labels{
+        "handler": "purchases",
+    }, units...)
 
     if err != nil {
         log.Fatal(err)
@@ -194,7 +182,7 @@ time.Sleep(100 * time.Millisecond)
 #### Example output
 
 ```bash
-# HELP get_stat Histogram for: get_stat
+# HELP get_stat Histogram created for get_stat
 # TYPE get_stat histogram
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0

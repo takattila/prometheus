@@ -1,16 +1,15 @@
 package prometheus
 
 import (
-	"fmt"
 	"time"
 
-	kitProm "github.com/go-kit/kit/metrics/prometheus"
-	clientGo "github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
 // GenerateUnits creates a float64 slice to measure request durations.
 func GenerateUnits(start, width float64, count int) []float64 {
-	return clientGo.LinearBuckets(start, width, count)
+	return prometheus.LinearBuckets(start, width, count)
 }
 
 func makeLinearBuckets(buckets []float64) []float64 {
@@ -38,34 +37,27 @@ func makeLinearBuckets(buckets []float64) []float64 {
 //
 // A histogram is also suitable to calculate an Apdex score.
 // When operating on buckets, remember that the histogram is cumulative.
-func (o *Object) Histogram(metricName string, labels []Label, since float64, units ...float64) (err error) {
+func (o *Object) Histogram(metricName string, value float64, labels Labels, units ...float64) (err error) {
 	labels = o.addServiceInfoToLabels(labels)
-	labelNames := getLabelNames(labels)
-
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, metricName, labelNames)
+			err = o.errorHandler(r, metricName, getLabelNames(labels))
 		}
 	}()
-
 	if o.histograms[metricName] == nil {
-		o.histograms[metricName] = kitProm.NewHistogramFrom(clientGo.HistogramOpts{
-			Name:        metricName,
-			Help:        fmt.Sprintf("Histogram for: %s", metricName),
-			Buckets:     makeLinearBuckets(units),
-			ConstLabels: clientGo.Labels{},
-		}, labelNames)
+		o.histograms[metricName] = promauto.With(o.reg).NewHistogramVec(prometheus.HistogramOpts{
+			Name:    metricName,
+			Help:    "Histogram created for " + metricName,
+			Buckets: makeLinearBuckets(units),
+		}, getLabelNames(labels))
 	}
-
-	o.histograms[metricName].With(makeSlice(labels)...).Observe(since)
+	o.histograms[metricName].With(prometheus.Labels(labels)).Observe(value)
 	return
 }
 
-// ElapsedTime is a histogram for request duration,
-// exported via a Prometheus summary with dynamically-computed quantiles.
-func (o *Object) ElapsedTime(metricName string, labels []Label, since time.Time, units ...float64) (err error) {
+func (o *Object) ElapsedTime(metricName string, since time.Time, labels Labels, units ...float64) (err error) {
 	func(begin time.Time) {
-		err = o.Histogram(metricName, labels, time.Since(begin).Seconds(), units...)
+		err = o.Histogram(metricName, time.Since(begin).Seconds(), labels, units...)
 	}(since)
 	return
 }

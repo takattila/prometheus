@@ -19,19 +19,17 @@ func ParseOutput(text string) map[string]*dto.MetricFamily {
 }
 
 // GetLabels gives back the labels for a metric.
-func GetLabels(text, metric string) (labels []Label) {
+func GetLabels(text, metric string) Labels {
 	out := ParseOutput(text)
 	obj := out[metric]
 
+	labels := make(Labels)
 	for _, m := range obj.GetMetric() {
 		for _, l := range m.GetLabel() {
-			labels = append(labels, Label{
-				Name:  *l.Name,
-				Value: *l.Value,
-			})
+			labels[*l.Name] = *l.Value
 		}
 	}
-	return
+	return labels
 }
 
 // GetFreePort asks the kernel for a free open port that is ready to use.

@@ -35,13 +35,18 @@ func ExampleGetLabels() {
 		AppName:     "ExampleGetLabels",
 	})
 
-	output := p.GetMetrics("promhttp_metric_handler_requests_total")
 	metric := "promhttp_metric_handler_requests_total"
+	err := p.Counter(metric, 1, prometheus.Labels{
+		"code": "200",
+	})
+	fmt.Println(err)
 
+	output := p.GetMetrics(p.App)
 	fmt.Println(prometheus.GetLabels(output, metric))
 
 	// Output:
-	// [{code 200} {code 500} {code 503}]
+	// <nil>
+	// map[app:ExampleGetLabels code:200 env:test]
 }
 
 func ExampleGetFreePort() {
