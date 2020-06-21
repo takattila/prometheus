@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -24,7 +23,7 @@ func (s gaugeSuite) TestGauge() {
 		expected := `example_gauge{app="TestGauge",env="test",foo1="bar1"} ` + fmt.Sprintf("%g", value)
 		actual := p.GetMetrics(p.App)
 
-		s.Equal(true, strings.Contains(actual, expected))
+		s.Contains(actual, expected)
 	}
 
 	p.StopHttpServer()

@@ -2,7 +2,6 @@ package prometheus
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
 
@@ -27,7 +26,7 @@ func (s histogramSuite) TestHistogram() {
 		expected := `example_histogram_bucket{app="TestHistogram",env="test",foo1="bar1",foo2="bar2",le="` + fmt.Sprintf("%g", unit) + `"} 1`
 		actual := p.GetMetrics(p.App)
 
-		s.Equal(true, strings.Contains(actual, expected))
+		s.Contains(actual, expected)
 	}
 
 	expectedSum := `example_histogram_sum{app="TestHistogram",env="test",foo1="bar1",foo2="bar2"}`
@@ -35,8 +34,8 @@ func (s histogramSuite) TestHistogram() {
 
 	actual := p.GetMetrics(p.App)
 
-	s.Equal(true, strings.Contains(actual, expectedSum))
-	s.Equal(true, strings.Contains(actual, expectedCount))
+	s.Contains(actual, expectedSum)
+	s.Contains(actual, expectedCount)
 
 	p.StopHttpServer()
 }
@@ -60,7 +59,7 @@ func (s histogramSuite) TestElapsedTime() {
 			expected := `example_elapsed_time_bucket{app="TestElapsedTime",env="test",foo1="bar1",le="` + fmt.Sprintf("%g", unit) + `"}`
 			actual := Grep(p.App, output)
 
-			s.Equal(true, strings.Contains(actual, expected))
+			s.Contains(actual, expected)
 		}
 
 		expectedSum := `example_elapsed_time_sum{app="TestElapsedTime",env="test",foo1="bar1"}`
@@ -68,8 +67,8 @@ func (s histogramSuite) TestElapsedTime() {
 
 		actual := Grep(p.App, output)
 
-		s.Equal(true, strings.Contains(actual, expectedSum))
-		s.Equal(true, strings.Contains(actual, expectedCount))
+		s.Contains(actual, expectedSum)
+		s.Contains(actual, expectedCount)
 
 		p.StopHttpServer()
 

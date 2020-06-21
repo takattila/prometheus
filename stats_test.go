@@ -24,7 +24,7 @@ func (s statsSuite) TestStatCountGoroutines() {
 		}
 	}
 
-	s.Equal(true, strings.Contains(actual, expected))
+	s.Contains(actual, expected)
 	p.StopHttpServer()
 }
 
@@ -42,7 +42,7 @@ func (s statsSuite) TestStatMemoryUsage() {
 			}
 		}
 
-		s.Equal(true, strings.Contains(actual, expected))
+		s.Contains(actual, expected)
 
 	}
 	p.StopHttpServer()

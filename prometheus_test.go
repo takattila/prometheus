@@ -1,7 +1,6 @@
 package prometheus
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -24,7 +23,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 	expected := `example_start_http_server{app="TestStartHttpServer",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual := p.GetMetrics(p.App)
 
-	s.Equal(true, strings.Contains(actual, expected))
+	s.Contains(actual, expected)
 
 	// 2. Restart the HTTP server.
 	p.StopHttpServer()
@@ -33,7 +32,7 @@ func (s prometheusSuite) TestStartHttpServer() {
 	expected = `example_start_http_server{app="TestStartHttpServer",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual = p.GetMetrics(p.App)
 
-	s.Equal(true, strings.Contains(actual, expected))
+	s.Contains(actual, expected)
 
 	// 3. Everything is alright, shutting down the server.
 	p.StopHttpServer()
@@ -53,7 +52,7 @@ func (s prometheusSuite) TestSetMetricsEndpoint() {
 	expected := `example_set_metrics_endpoint{app="TestSetMetricsEndpoint",env="test",foo1="bar1",foo2="bar2"} 1`
 	actual := p.GetMetrics(p.App)
 
-	s.Equal(true, strings.Contains(actual, expected))
+	s.Contains(actual, expected)
 	p.StopHttpServer()
 }
 

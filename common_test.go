@@ -35,7 +35,9 @@ func (s commonSuite) TestGetLabelNames() {
 		"foo1": "bar1",
 		"foo2": "bar2",
 	})
-	s.Equal(expected, actual)
+	for _, e := range expected {
+		s.Contains(actual, e)
+	}
 }
 
 func TestCommonSuite(t *testing.T) {
