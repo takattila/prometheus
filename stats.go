@@ -11,6 +11,7 @@ import (
 func (o *Object) statCountGoroutines() {
 	if o.StatCountGoroutines {
 		t := time.NewTicker(time.Second)
+
 		go func() {
 			for range t.C {
 				_ = o.Gauge("stat_goroutines:count", float64(runtime.NumGoroutine()), Labels{})
@@ -70,7 +71,7 @@ func (c cpuP) getFirstElement() float64 {
 }
 
 func (o *Object) statCpuUsage() {
-	if o.StatCountGoroutines {
+	if o.StatCpuUsage {
 		t := time.NewTicker(time.Second)
 
 		go func() {
