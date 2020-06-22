@@ -26,13 +26,20 @@ func (o *Object) statMemoryUsage() {
 
 		go func() {
 			for range t.C {
+				// System memory usage
 				m, _ := mem.VirtualMemory()
+				// Total amount of RAM on this system
 				_ = o.Gauge("stat_memory_usage:total", float64(m.Total), Labels{})
+				// RAM available for programs to allocate
 				_ = o.Gauge("stat_memory_usage:avail", float64(m.Available), Labels{})
+				// RAM used by programs
 				_ = o.Gauge("stat_memory_usage:used", float64(m.Used), Labels{})
+				// This is the kernel's notion of free memory
 				_ = o.Gauge("stat_memory_usage:free", float64(m.Free), Labels{})
+				// Percentage of RAM used by programs
 				_ = o.Gauge("stat_memory_usage:used_percent", float64(m.UsedPercent), Labels{})
 
+				// Used memory by the application
 				var memory runtime.MemStats
 				runtime.ReadMemStats(&memory)
 				// Sys is the total bytes of memory obtained from the OS
