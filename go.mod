@@ -13,6 +13,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v0.23.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/clbanning/x2j v0.0.0-20191024224557-825249438eec // indirect
+	github.com/cockroachdb/benchviz v0.0.0-20160815200340-a5a6062c377e // indirect
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/coreos/etcd v3.3.22+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect

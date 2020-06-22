@@ -20,6 +20,9 @@ jobs:
     - name: Run Unit tests
       run: |
         go test -covermode atomic -race -coverprofile=profile.cov ./...
+    - name: Run Benchmark tests
+      run: |
+        ./scripts/test-benchmark.sh
     - name: Send coverage
       env:
         COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
