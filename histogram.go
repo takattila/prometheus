@@ -1,8 +1,6 @@
 package prometheus
 
 import (
-	"time"
-
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
@@ -52,12 +50,5 @@ func (o *Object) Histogram(metricName string, value float64, labels Labels, unit
 		}, getLabelNames(labels))
 	}
 	o.histograms[metricName].With(prometheus.Labels(labels)).Observe(value)
-	return
-}
-
-func (o *Object) ElapsedTime(metricName string, since time.Time, labels Labels, units ...float64) (err error) {
-	func(begin time.Time) {
-		err = o.Histogram(metricName, time.Since(begin).Seconds(), labels, units...)
-	}(since)
 	return
 }

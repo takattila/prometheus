@@ -40,43 +40,6 @@ func (s histogramSuite) TestHistogram() {
 	p.StopHttpServer()
 }
 
-func (s histogramSuite) TestElapsedTime() {
-	p := New(initProm("TestElapsedTime"))
-
-	defer func(begin time.Time) {
-
-		buckets := GenerateUnits(0.02, 0.02, 10)
-
-		err := p.ElapsedTime("example_elapsed_time", begin, Labels{
-			"foo1": "bar1",
-		}, buckets...)
-
-		s.Equal(nil, err)
-
-		output := p.getMetrics()
-
-		for _, unit := range buckets {
-			expected := `example_elapsed_time_bucket{app="TestElapsedTime",env="test",foo1="bar1",le="` + fmt.Sprintf("%g", unit) + `"}`
-			actual := Grep(p.App, output)
-
-			s.Contains(actual, expected)
-		}
-
-		expectedSum := `example_elapsed_time_sum{app="TestElapsedTime",env="test",foo1="bar1"}`
-		expectedCount := `example_elapsed_time_count{app="TestElapsedTime",env="test",foo1="bar1"} 1`
-
-		actual := Grep(p.App, output)
-
-		s.Contains(actual, expectedSum)
-		s.Contains(actual, expectedCount)
-
-		p.StopHttpServer()
-
-	}(time.Now())
-
-	time.Sleep(100 * time.Millisecond)
-}
-
 func (s histogramSuite) TestHistogramError() {
 	p := New(initProm("TestHistogramError"))
 

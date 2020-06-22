@@ -16,41 +16,15 @@ func ExampleObject_Histogram() {
 		AppName:     "ExampleHistogram",
 	})
 
-	since := time.Since(time.Now()).Seconds()
-	units := prometheus.GenerateUnits(1, 1, 5)
-
-	err := p.Histogram("history", since, prometheus.Labels{
-		"sell": "actual",
-	}, units...)
-
-	fmt.Println()
-	fmt.Println(p.GetMetrics("history_bucket"))
-	fmt.Println("Error:", err)
-
-	// Output:
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="1"} 1
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="2"} 1
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="3"} 1
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="4"} 1
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="5"} 1
-	// history_bucket{app="ExampleHistogram",env="test",sell="actual",le="+Inf"} 1
-	// Error: <nil>
-}
-
-func ExampleObject_ElapsedTime() {
-	p := prometheus.New(prometheus.Init{
-		Host:        "0.0.0.0",
-		Port:        prometheus.GetFreePort(),
-		Environment: "test",
-		AppName:     "ExampleElapsedTime",
-	})
-
 	start := time.Now()
 
+	// Elapsed time to measure the computation time
+	// of a given function, handler, etc...
 	defer func(begin time.Time) {
 		units := prometheus.GenerateUnits(0.05, 0.05, 5)
+		since := time.Since(begin).Seconds()
 
-		err := p.ElapsedTime("get_stat", begin, prometheus.Labels{
+		err := p.Histogram("get_stat", since, prometheus.Labels{
 			"handler": "purchases",
 		}, units...)
 

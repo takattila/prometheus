@@ -48,9 +48,6 @@ It **provides statistics** as well:
    * [Histogram](#histogram)
       * [Example code](#example-code-3)
       * [Example output](#example-output-3)
-   * [Elapsed time](#elapsed-time)
-      * [Example code](#example-code-4)
-      * [Example output](#example-output-4)
    * [Other examples](#other-examples)
 
 ## Example usage
@@ -169,53 +166,24 @@ exposes multiple time series during a scrape:
 #### Example code
 
 ```go
-since := time.Since(time.Now()).Seconds()
-units := prometheus.GenerateUnits(1, 1, 5)
+	start := time.Now()
 
-err := p.Histogram("history", since, prometheus.Labels{
-    "sell": "actual",
-}, units...)
+	// Elapsed time to measure the computation time
+	// of a given function, handler, etc...
+	defer func(begin time.Time) {
+		units := prometheus.GenerateUnits(0.05, 0.05, 5)
+		since := time.Since(begin).Seconds()
 
-fmt.Println()
-fmt.Println(p.GetMetrics("history_bucket"))
-```
+		err := p.Histogram("get_stat", since, prometheus.Labels{
+			"handler": "purchases",
+		}, units...)
 
-[Back to top](#table-of-contents)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(start)
 
-#### Example output
-
-```bash
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="1"} 1
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="2"} 1
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="3"} 1
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="4"} 1
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="5"} 1
-history_bucket{app="ExampleHistogram",env="test",sell="actual",le="+Inf"} 1
-```
-
-[Back to top](#table-of-contents)
-
-### Elapsed time
-Place this code bellow to measure the computation time of a given function, handler, etc.
-
-#### Example code
-
-```go
-start := time.Now()
-
-defer func(begin time.Time) {
-    units := prometheus.GenerateUnits(0.05, 0.05, 5)
-
-    err := p.ElapsedTime("get_stat", begin, prometheus.Labels{
-        "handler": "purchases",
-    }, units...)
-
-    if err != nil {
-        log.Fatal(err)
-    }
-}(start)
-
-time.Sleep(100 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 ```
 
 [Back to top](#table-of-contents)
