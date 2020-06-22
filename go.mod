@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	bou.ke/monkey v1.0.2 // indirect
+	github.com/Pallinder/go-randomdata v1.2.0
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/VividCortex/gohistogram v1.0.0 // indirect
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5 // indirect

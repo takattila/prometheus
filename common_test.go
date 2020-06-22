@@ -17,9 +17,9 @@ func initProm(appName string) Init {
 		Environment: "test",
 		AppName:     appName,
 
-		StatCountGoroutines: true,
-		StatMemoryUsage:     true,
-		StatCpuUsage:        true,
+		StatCountGoroutines: false,
+		StatMemoryUsage:     false,
+		StatCpuUsage:        false,
 	}
 }
 
