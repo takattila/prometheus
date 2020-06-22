@@ -25,41 +25,31 @@ function installTools() {
   fi
 }
 
-function tailFile() {
-  local file=$1
-  tail -n 1 -f "${file}" -s 0.1 2>/dev/null | while read -r line; do
-    if [[ "${line}" == "PASS" ]]; then
-      break
-    fi
-    echo "${line}"
-  done
-}
-
-function nohupFile() {
-  local file=$1
-  (nohup go test -bench=. >"${file}" &) 2>/dev/null
-  sleep 0.2
+function runBenchmark() {
+    local file=$1
+     go test -bench=. > "${file}"
+     cat "${file}"
 }
 
 function benchmark() {
   if [[ ! -e old-"${JOB_ID}"-bench.out ]]; then
     printf "== Running benchmark tests...\n\n"
-    nohupFile old-"${JOB_ID}"-bench.out
-    tailFile old-"${JOB_ID}"-bench.out
+    runBenchmark old-"${JOB_ID}"-bench.out
   else
     rm -f new-"${JOB_ID}"-bench.out
     printf "== Running benchmark test and comparing with old test results...\n\n"
-    nohupFile new-"${JOB_ID}"-bench.out
-    tailFile new-"${JOB_ID}"-bench.out
+    runBenchmark new-"${JOB_ID}"-bench.out
 
     printf "\n== Comparison:\n\n"
     "$GOPATH/bin/benchcmp" old-"${JOB_ID}"-bench.out new-"${JOB_ID}"-bench.out >benchcmp.out
     cat benchcmp.out
-    cat new-"${JOB_ID}"-bench.out >old-"${JOB_ID}"-bench.out
+
     "$GOPATH/bin/benchviz" >"${JOB_ID}".svg <benchcmp.out
     if [[ -z "${GITHUB_WORKFLOW}" ]]; then
       xdg-open "${JOB_ID}".svg
     fi
+
+    cat new-"${JOB_ID}"-bench.out >old-"${JOB_ID}"-bench.out
   fi
 }
 
