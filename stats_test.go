@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -21,14 +22,23 @@ func (s statsSuite) TestStatCountGoroutines() {
 	expected := "stat_goroutines:count"
 	actual := ""
 
+	count := 0
+	maxLoops := 50
+
 	var wg sync.WaitGroup
 	wg.Add(1)
-	for {
+
+	t := time.NewTicker(100 * time.Millisecond)
+	for range t.C {
+		if count == maxLoops {
+			s.T().Fatalf("loop of TestStatCountGoroutines is reached the maximum value: %d\n", maxLoops)
+		}
 		actual = p.GetMetrics(expected)
 		if strings.Contains(actual, expected) {
 			wg.Done()
 			break
 		}
+		count++
 	}
 	wg.Wait()
 
@@ -46,14 +56,23 @@ func (s statsSuite) TestStatMemoryUsage() {
 		expected := "stat_memory_usage:" + t
 		actual := ""
 
+		count := 0
+		maxLoops := 50
+
 		var wg sync.WaitGroup
 		wg.Add(1)
-		for {
+
+		t := time.NewTicker(100 * time.Millisecond)
+		for range t.C {
+			if count == maxLoops {
+				s.T().Fatalf("loop of TestStatMemoryUsage is reached the maximum value: %d\n", maxLoops)
+			}
 			actual = p.GetMetrics(expected)
 			if strings.Contains(actual, expected) {
 				wg.Done()
 				break
 			}
+			count++
 		}
 		wg.Wait()
 
@@ -71,14 +90,23 @@ func (s statsSuite) TestStatCpuUsage() {
 	expected := "stat_cpu_usage:percent"
 	actual := ""
 
+	count := 0
+	maxLoops := 50
+
 	var wg sync.WaitGroup
 	wg.Add(1)
-	for {
+
+	t := time.NewTicker(100 * time.Millisecond)
+	for range t.C {
+		if count == maxLoops {
+			s.T().Fatalf("loop of TestStatCpuUsage is reached the maximum value: %d\n", maxLoops)
+		}
 		actual = p.GetMetrics(expected)
 		if strings.Contains(actual, expected) {
 			wg.Done()
 			break
 		}
+		count++
 	}
 	wg.Wait()
 
