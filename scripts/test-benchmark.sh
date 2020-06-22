@@ -1,59 +1,58 @@
 #!/bin/bash
 
-JOB_ID=$(
-  if [[ "${GITHUB_WORKFLOW}" ]]; then
-    echo "${GITHUB_WORKFLOW}"
-  else
-    echo 1
-  fi
-)
+function init() {
+  JOB_ID=$(
+    if [[ "${GITHUB_WORKFLOW}" ]]; then
+      echo "${GITHUB_WORKFLOW}"
+    else
+      echo 1
+    fi
+  )
+
+  CACHE_DIR=~/.test_cache
+
+  GOPATH=$(
+    if [[ -z "${GITHUB_WORKFLOW}" ]]; then
+      echo "${GOPATH}"
+    else
+      echo "${HOME}/go"
+    fi
+  )
+  mkdir -p "${CACHE_DIR}"
+}
 
 function installTools() {
-  if [[ "$(
-    command -v benchcmp >/dev/null
-    echo $?
-  )" == "1" ]]; then
-    printf "== Installing benchcmp...\n\n"
-    go install golang.org/x/tools/cmd/benchcmp
-  fi
-  if [[ "$(
-    command -v benchviz >/dev/null
-    echo $?
-  )" == "1" ]]; then
-    printf "== Installing benchviz...\n\n"
-    go install github.com/ajstarks/svgo/benchviz
+  if [[ ! -e "${GOPATH}/bin/benchstat" ]]; then
+    printf "== Installing benchstat...\n"
+    go get -u golang.org/x/perf/cmd/benchstat
   fi
 }
 
 function runBenchmark() {
-    local file=$1
-     go test -bench=. > "${file}"
-     cat "${file}"
+  local file=$1
+  go test -bench=. >"${file}"
+  cat "${file}"
 }
 
 function benchmark() {
-  if [[ ! -e old-"${JOB_ID}"-bench.out ]]; then
+  local benchStat="${GOPATH}/bin/benchstat"
+
+  if [[ ! -e "${CACHE_DIR}"/old-"${JOB_ID}"-bench.out ]]; then
     printf "== Running benchmark tests...\n\n"
-    runBenchmark old-"${JOB_ID}"-bench.out
+    runBenchmark "${CACHE_DIR}"/old-"${JOB_ID}"-bench.out
   else
-    rm -f new-"${JOB_ID}"-bench.out
-    printf "== Running benchmark test and comparing with old test results...\n\n"
-    runBenchmark new-"${JOB_ID}"-bench.out
+    rm -f "${CACHE_DIR}"/new-"${JOB_ID}"-bench.out
+    printf "== Running benchmark tests and comparing with old test results...\n\n"
+    runBenchmark "${CACHE_DIR}"/new-"${JOB_ID}"-bench.out
 
     printf "\n== Comparison:\n\n"
-    "$GOPATH/bin/benchcmp" old-"${JOB_ID}"-bench.out new-"${JOB_ID}"-bench.out >benchcmp.out
-    cat benchcmp.out
-
-    "$GOPATH/bin/benchviz" >"${JOB_ID}".svg <benchcmp.out
-    if [[ -z "${GITHUB_WORKFLOW}" ]]; then
-      xdg-open "${JOB_ID}".svg
-    fi
-
-    cat new-"${JOB_ID}"-bench.out >old-"${JOB_ID}"-bench.out
+    "${benchStat}" "${CACHE_DIR}"/old-"${JOB_ID}"-bench.out "${CACHE_DIR}"/new-"${JOB_ID}"-bench.out
+    cat "${CACHE_DIR}"/new-"${JOB_ID}"-bench.out >"${CACHE_DIR}"/old-"${JOB_ID}"-bench.out
   fi
 }
 
 function main() {
+  init
   installTools
   benchmark
 }
