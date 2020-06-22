@@ -77,7 +77,8 @@ func New(i Init) *Object {
 }
 
 // StartHttpServer starts providing metrics data
-// on given host and port on all route.
+// on given host and port on the endpoint
+// which set by (*Object).MetricsEndpoint.
 func (o *Object) StartHttpServer() {
 	o.server = o.serve()
 }
