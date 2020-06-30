@@ -52,9 +52,8 @@ func Grep(find, inText string) (result string) {
 	return
 }
 
-// RoundFloat truncate the decimal places of a float64 number
-// by a given precision:
-//   RoundFloat(1.599633154856, 2) -> 1.6
+// RoundFloat truncate the decimal places
+// of a float64 number by a given precision.
 func RoundFloat(value float64, decimalPlaces int) float64 {
 	pow := math.Pow(10, float64(decimalPlaces))
 	return math.Round(value*pow) / pow
