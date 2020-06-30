@@ -49,6 +49,22 @@ func ExampleGetLabels() {
 	// map[app:ExampleGetLabels code:200 env:test]
 }
 
+func ExampleRoundFloat() {
+	float := prometheus.RoundFloat(1.559633154856, 2)
+	fmt.Println(float)
+
+	// Output:
+	// 1.56
+}
+
+func ExampleDecimalPlaces() {
+	dp := prometheus.DecimalPlaces(1.559633154856)
+	fmt.Println(dp)
+
+	// Output:
+	// 12
+}
+
 func ExampleGetFreePort() {
 	port := prometheus.GetFreePort()
 	fmt.Println(port)
