@@ -5,18 +5,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
-// GenerateUnits creates a float64 slice to measure request durations.
-func GenerateUnits(start, width float64, count int) []float64 {
-	return prometheus.LinearBuckets(start, width, count)
-}
-
-func makeLinearBuckets(buckets []float64) []float64 {
-	if len(buckets) == 0 {
-		return GenerateUnits(0.5, 0.5, 20)
-	}
-	return buckets
-}
-
 // Histogram samples observations (usually things like request durations
 // or response sizes) and counts them in configurable buckets.
 // It also provides a sum of all observed values.
@@ -51,4 +39,21 @@ func (o *Object) Histogram(metricName string, value float64, labels Labels, unit
 	}
 	o.histograms[metricName].With(prometheus.Labels(labels)).Observe(value)
 	return
+}
+
+// GenerateUnits creates a float64 slice to measure request durations.
+func GenerateUnits(start, width float64, count int) []float64 {
+	buckets := prometheus.LinearBuckets(start, width, count)
+	for i := range buckets {
+		buckets[i] = RoundFloat(start, DecimalPlaces(start))
+		start += width
+	}
+	return buckets
+}
+
+func makeLinearBuckets(buckets []float64) []float64 {
+	if len(buckets) == 0 {
+		return GenerateUnits(0.5, 0.5, 20)
+	}
+	return buckets
 }

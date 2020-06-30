@@ -3,6 +3,8 @@ package prometheus
 
 import (
 	"bufio"
+	"fmt"
+	"math"
 	"strings"
 
 	"github.com/phayes/freeport"
@@ -48,4 +50,23 @@ func Grep(find, inText string) (result string) {
 		}
 	}
 	return
+}
+
+// RoundFloat truncate the decimal places of a float64 number
+// by a given precision:
+//   RoundFloat(1.599633154856, 2) -> 1.6
+func RoundFloat(value float64, decimalPlaces int) float64 {
+	pow := math.Pow(10, float64(decimalPlaces))
+	return math.Round(value*pow) / pow
+}
+
+// DecimalPlaces returns the number of decimal places of a float64 number.
+func DecimalPlaces(n float64) int {
+	num := fmt.Sprintf("%g", n)
+	if strings.Contains(num, ".") {
+		num = strings.Split(num, ".")[1]
+		num = strings.TrimRight(num, "0") // remove trailing 0s
+		return len(num)
+	}
+	return 0
 }
