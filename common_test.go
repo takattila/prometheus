@@ -23,12 +23,6 @@ func initProm(appName string) Init {
 	}
 }
 
-func (s commonSuite) TestGenerateUnits() {
-	expected := []float64{0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5}
-	actual := GenerateUnits(0.5, 1, 10)
-	s.Equal(expected, actual)
-}
-
 func (s commonSuite) TestGetLabelNames() {
 	expected := []string{"foo1", "foo2"}
 	actual := getLabelNames(Labels{

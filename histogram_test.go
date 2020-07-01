@@ -62,6 +62,12 @@ func (s histogramSuite) TestHistogramError() {
 	p.StopHttpServer()
 }
 
+func (s histogramSuite) TestGenerateUnits() {
+	expected := []float64{0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5}
+	actual := GenerateUnits(0.5, 1, 10)
+	s.Equal(expected, actual)
+}
+
 func TestHistogramSuite(t *testing.T) {
 	suite.Run(t, new(histogramSuite))
 }
