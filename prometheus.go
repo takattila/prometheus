@@ -1,4 +1,16 @@
-// The prometheus package provides Prometheus implementations for metrics.
+// This package is a Prometheus implementation for metrics.
+// In its creation, the main consideration was the ease of use.
+//
+// Provides the following metric types:
+//   - Counter,
+//   - Gauge,
+//   - Histogram.
+//
+// It can also provide built-in statistics (optionally)
+// about the system and the application:
+//   - goroutines,
+//   - memory usage,
+//   - cpu usage.
 package prometheus
 
 import (

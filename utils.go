@@ -1,4 +1,3 @@
-// The prometheus package provides Prometheus implementations for metrics.
 package prometheus
 
 import (
