@@ -21,7 +21,7 @@ func ExampleObject_Histogram() {
 	// Elapsed time to measure the computation time
 	// of a given function, handler, etc...
 	defer func(begin time.Time) {
-		units := prometheus.GenerateUnits(0.05, 0.05, 5)
+		units := prometheus.GenerateUnits(0.5, 0.05, 5)
 		since := time.Since(begin).Seconds()
 
 		err := p.Histogram("get_stat", since, prometheus.Labels{
@@ -38,14 +38,14 @@ func ExampleObject_Histogram() {
 	// Output example:
 	// # HELP get_stat Histogram created for get_stat
 	// # TYPE get_stat histogram
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.15000000000000002"} 1
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.2"} 1
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.25"} 1
-	// get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="+Inf"} 1
-	// get_stat_sum{app="ExampleElapsedTime",env="test",handler="purchases"} 0.100132995
-	// get_stat_count{app="ExampleElapsedTime",env="test",handler="purchases"} 1
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="0.05"} 0
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="0.1"} 0
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="0.15"} 1
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="0.2"} 1
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="0.25"} 1
+	// get_stat_bucket{app="ExampleHistogram",env="test",handler="purchases",le="+Inf"} 1
+	// get_stat_sum{app="ExampleHistogram",env="test",handler="purchases"} 0.100233303
+	// get_stat_count{app="ExampleHistogram",env="test",handler="purchases"} 1
 }
 
 func ExampleGenerateUnits() {

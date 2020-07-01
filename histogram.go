@@ -41,11 +41,22 @@ func (o *Object) Histogram(metricName string, value float64, labels Labels, unit
 	return
 }
 
+func calculateDecimalPlaces(start, width float64) (dp int) {
+	s := DecimalPlaces(start)
+	w := DecimalPlaces(width)
+	dp = w
+	if s > w {
+		dp = s
+	}
+	return
+}
+
 // GenerateUnits creates a float64 slice to measure request durations.
 func GenerateUnits(start, width float64, count int) []float64 {
 	buckets := prometheus.LinearBuckets(start, width, count)
+	dp := calculateDecimalPlaces(start, width)
 	for i := range buckets {
-		buckets[i] = RoundFloat(start, DecimalPlaces(start))
+		buckets[i] = RoundFloat(start, dp)
 		start += width
 	}
 	return buckets
