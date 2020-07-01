@@ -2,7 +2,7 @@
 
 [![Test](https://github.com/takattila/prometheus/workflows/Test/badge.svg?branch=master)](https://github.com/takattila/prometheus/actions?query=workflow:Test)
 [![Coverage Status](https://coveralls.io/repos/github/takattila/prometheus/badge.svg?branch=master)](https://coveralls.io/github/takattila/prometheus?branch=master)
-[![GOdoc](https://img.shields.io/badge/godoc-reference-orange)](https://godoc.org/github.com/takattila/prometheus)
+[![GOdoc](https://img.shields.io/badge/godoc-reference-orange)](https://pkg.go.dev/github.com/takattila/prometheus?tab=doc)
 [![Version](https://img.shields.io/badge/dynamic/json.svg?label=version&url=https://api.github.com/repos/takattila/prometheus/releases/latest&query=tag_name)](https://github.com/takattila/prometheus/releases)
 
 This package is a Prometheus implementation for metrics.
@@ -12,7 +12,7 @@ This package is a Prometheus implementation for metrics.
 It **provides statistics** as well:
 
 - **Goroutines** (count)
-- **Memory** usage (bytes)
+- **Memory** usage
 
   - **System**:
   
