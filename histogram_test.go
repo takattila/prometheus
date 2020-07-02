@@ -68,6 +68,81 @@ func (s histogramSuite) TestGenerateUnits() {
 	s.Equal(expected, actual)
 }
 
+func (s histogramSuite) TestStartStopMeasureExecTime() {
+	p := New(initProm("TestStartStopMeasureExecTime"))
+
+	for _, t := range []struct {
+		Sleep        time.Duration
+		MetricName   string
+		Units        []float64
+		TimeDuration time.Duration
+		Expected     string
+	}{
+		{
+			Sleep:        5000 * time.Nanosecond,
+			MetricName:   "execution_time_nano_sec",
+			Units:        GenerateUnits(50000, 100000, 10),
+			TimeDuration: time.Nanosecond,
+			Expected:     `execution_time_nano_sec_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="950000"} 1`,
+		},
+		{
+			Sleep:        100 * time.Microsecond,
+			MetricName:   "execution_time_micro_sec",
+			Units:        GenerateUnits(50, 50, 10),
+			TimeDuration: time.Microsecond,
+			Expected:     `execution_time_micro_sec_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="500"} 1`,
+		},
+		{
+			Sleep:        10 * time.Millisecond,
+			MetricName:   "execution_time_milli_sec",
+			Units:        GenerateUnits(5, 5, 10),
+			TimeDuration: time.Millisecond,
+			Expected:     `execution_time_milli_sec_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="50"} 1`,
+		},
+		{
+			Sleep:        1 * time.Second,
+			MetricName:   "execution_time_seconds",
+			Units:        GenerateUnits(0.5, 0.5, 10),
+			TimeDuration: time.Second,
+			Expected:     `execution_time_seconds_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="5"} 1`,
+		},
+		{
+			Sleep:        1 * time.Second,
+			MetricName:   "execution_time_minutes",
+			Units:        GenerateUnits(0.005, 0.005, 10),
+			TimeDuration: time.Minute,
+			Expected:     `execution_time_minutes_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="0.05"} 1`,
+		},
+		{
+			// TimeDuration: not given,
+			MetricName: "execution_time_default_milli_sec",
+			Units:      GenerateUnits(5, 5, 10),
+			Sleep:      10 * time.Millisecond,
+			Expected:   `execution_time_default_milli_sec_bucket{app="TestStartStopMeasureExecTime",env="test",foo1="bar1",le="50"} 1`,
+		},
+	} {
+		// Measure start
+		met := p.StartMeasureExecTime(MeasureExecTime{
+			MetricName:   t.MetricName,
+			Units:        t.Units,
+			TimeDuration: t.TimeDuration,
+			Labels:       Labels{"foo1": "bar1"},
+		})
+
+		time.Sleep(t.Sleep)
+
+		err := met.StopMeasureExecTime()
+		// Measure end
+
+		s.Equal(nil, err)
+
+		actual := p.GetMetrics(t.MetricName)
+		s.Contains(actual, t.Expected)
+	}
+
+	p.StopHttpServer()
+}
+
 func TestHistogramSuite(t *testing.T) {
 	suite.Run(t, new(histogramSuite))
 }

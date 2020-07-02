@@ -48,6 +48,9 @@ It **provides statistics** as well:
    * [Histogram](#histogram)
       * [Example code](#example-code-3)
       * [Example output](#example-output-3)
+   * [Measure execution time](#measure-execution-time)
+      * [Example code](#example-code-4)
+      * [Example output](#example-output-4)
    * [Other examples](#other-examples)
 
 ## Example usage
@@ -166,24 +169,24 @@ exposes multiple time series during a scrape:
 #### Example code
 
 ```go
-	start := time.Now()
+start := time.Now()
 
-	// Elapsed time to measure the computation time
-	// of a given function, handler, etc...
-	defer func(begin time.Time) {
-		units := prometheus.GenerateUnits(0.05, 0.05, 5)
-		since := time.Since(begin).Seconds()
+// Elapsed time to measure the computation time
+// of a given function, handler, etc...
+defer func(begin time.Time) {
+    units := prometheus.GenerateUnits(0.05, 0.05, 5)
+    since := time.Since(begin).Seconds()
 
-		err := p.Histogram("get_stat", since, prometheus.Labels{
-			"handler": "purchases",
-		}, units...)
+    err := p.Histogram("get_stat", since, prometheus.Labels{
+        "handler": "purchases",
+    }, units...)
 
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(start)
+    if err != nil {
+        log.Fatal(err)
+    }
+}(start)
 
-	time.Sleep(100 * time.Millisecond)
+time.Sleep(100 * time.Millisecond)
 ```
 
 [Back to top](#table-of-contents)
@@ -201,6 +204,53 @@ get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.25
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="+Inf"} 1
 get_stat_sum{app="ExampleElapsedTime",env="test",handler="purchases"} 0.100132995
 get_stat_count{app="ExampleElapsedTime",env="test",handler="purchases"} 1
+```
+
+[Back to top](#table-of-contents)
+
+### Measure execution time
+To measure the runtime of a particular calculation use `StartMeasureExecTime` function.
+
+#### Example code
+
+```go
+ms := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+    MetricName:   "execution_time_milli_sec",
+    Labels:       prometheus.Labels{"function": "calculate"},
+    Units:        prometheus.GenerateUnits(5, 5, 10),
+    TimeDuration: time.Millisecond,
+})
+
+time.Sleep(10 * time.Millisecond)
+
+err := ms.StopMeasureExecTime()
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Println(p.GetMetrics("execution_time_milli_sec"))
+```
+
+[Back to top](#table-of-contents)
+
+#### Example output
+
+```bash
+# HELP execution_time_milli_sec Histogram created for execution_time_milli_sec
+# TYPE execution_time_milli_sec histogram
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="5"} 0
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="10"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="15"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="20"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="25"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="30"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="35"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="40"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="45"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="50"} 1
+execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="+Inf"} 1
+execution_time_milli_sec_sum{app="ExampleApp",env="test",function="calculate"} 10
+execution_time_milli_sec_count{app="ExampleApp",env="test",function="calculate"} 1
 ```
 
 [Back to top](#table-of-contents)
