@@ -8,9 +8,9 @@
 //
 // It can also provide built-in statistics (optionally)
 // about the system and the application:
-//   - goroutines,
-//   - memory usage,
-//   - cpu usage.
+//   - Goroutines,
+//   - Memory usage,
+//   - CPU usage.
 package prometheus
 
 import (
