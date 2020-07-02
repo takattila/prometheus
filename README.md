@@ -6,32 +6,20 @@
 [![Version](https://img.shields.io/badge/dynamic/json.svg?label=version&url=https://api.github.com/repos/takattila/prometheus/releases/latest&query=tag_name)](https://github.com/takattila/prometheus/releases)
 
 This package is a Prometheus implementation for metrics.
+In its creation, the main consideration was the ease of use.
+
+Provides the following metric types:
+  - [Counter](#counter),
+  - [Gauge](#gauge),
+  - [Histogram](#histogram).
+
+It can also provide [built-in statistics](#built-in-statistics) (optionally)
+about the system and the application:
+  - Goroutines,
+  - Memory usage,
+  - CPU usage.
 
 ![prometheus screenshot](./img/screenshot-01.png)
-
-It **provides statistics** as well:
-
-- **Goroutines** (count)
-- **Memory** usage
-
-  - **System**:
-  
-    - `Total`: total amount of RAM on this system
-    - `Avail`: RAM available for programs to allocate
-    - `Used` (bytes): RAM used by programs
-    - `Free`: this is the kernel's notion of free memory
-    - `Used` (percent): percentage of RAM used by programs
-    
-  - **Used by the application**:
-  
-    - `Sys`: the total bytes of memory obtained from the OS
-    - `Alloc`: bytes of allocated heap objects
-    - `HeapSys`: bytes of heap memory obtained from the OS
-    - `HeapInuse`: bytes in in-use spans
-    - `NumGC`: the number of completed GC cycles
-
-- **CPU** usage (percentage)
-
 
 ## Table of contents
 
@@ -52,6 +40,7 @@ It **provides statistics** as well:
       * [Example code](#example-code-4)
       * [Example output](#example-output-4)
    * [Other examples](#other-examples)
+* [Built-in statistics](#built-in-statistics)
 
 ## Example usage
 
@@ -258,6 +247,33 @@ execution_time_milli_sec_count{app="ExampleApp",env="test",function="calculate"}
 ### Other examples
 
 For more examples, please visit: [godoc page](https://godoc.org/github.com/takattila/prometheus#pkg-examples) .
+
+[Back to top](#table-of-contents)
+
+## Built-in statistics
+
+It **provides statistics** as well:
+
+- **Goroutines** (count)
+- **Memory** usage
+
+  - **System**:
+  
+    - `Total`: total amount of RAM on this system
+    - `Avail`: RAM available for programs to allocate
+    - `Used` (bytes): RAM used by programs
+    - `Free`: this is the kernel's notion of free memory
+    - `Used` (percent): percentage of RAM used by programs
+    
+  - **Used by the application**:
+  
+    - `Sys`: the total bytes of memory obtained from the OS
+    - `Alloc`: bytes of allocated heap objects
+    - `HeapSys`: bytes of heap memory obtained from the OS
+    - `HeapInuse`: bytes in in-use spans
+    - `NumGC`: the number of completed GC cycles
+
+- **CPU** usage (percentage)
 
 [Back to top](#table-of-contents)
 
