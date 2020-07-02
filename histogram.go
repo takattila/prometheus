@@ -103,13 +103,13 @@ func (m *MeasureExecTime) StopMeasureExecTime() error {
 	case time.Second:
 		executionTime = time.Since(m.start).Seconds()
 	case time.Millisecond:
-		executionTime = float64(time.Since(m.start).Milliseconds())
+		executionTime = float64(time.Since(m.start).Nanoseconds() / 1e6)
 	case time.Microsecond:
-		executionTime = float64(time.Since(m.start).Microseconds())
+		executionTime = float64(time.Since(m.start).Nanoseconds() / 1e3)
 	case time.Nanosecond:
 		executionTime = float64(time.Since(m.start).Nanoseconds())
 	default:
-		executionTime = float64(time.Since(m.start).Milliseconds())
+		executionTime = float64(time.Since(m.start).Nanoseconds() / 1e6)
 	}
 	return m.object.Histogram(m.MetricName, executionTime, m.Labels, m.Units...)
 }
