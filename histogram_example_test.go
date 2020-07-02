@@ -21,12 +21,12 @@ func ExampleObject_Histogram() {
 	// Elapsed time to measure the computation time
 	// of a given function, handler, etc...
 	defer func(begin time.Time) {
-		units := prometheus.GenerateUnits(0.5, 0.05, 5)
-		since := time.Since(begin).Seconds()
-
-		err := p.Histogram("get_stat", since, prometheus.Labels{
-			"handler": "purchases",
-		}, units...)
+		err := p.Histogram(prometheus.HistogramArgs{
+			MetricName: "get_stat",
+			Labels:     prometheus.Labels{"handler": "purchases"},
+			Units:      prometheus.GenerateUnits(0.5, 0.05, 5),
+			Value:      time.Since(begin).Seconds(),
+		})
 
 		if err != nil {
 			log.Fatal(err)
@@ -71,7 +71,7 @@ func ExampleObject_StartMeasureExecTime() {
 	})
 
 	// Nanoseconds start
-	ns := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	ns := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_nano_sec",
 		Labels:       prometheus.Labels{"function": functionName},
 		Units:        prometheus.GenerateUnits(5000, 10000, 10),
@@ -88,7 +88,7 @@ func ExampleObject_StartMeasureExecTime() {
 	// Nanoseconds end
 
 	// Microseconds start
-	µs := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	µs := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_micro_sec",
 		Labels:       prometheus.Labels{"function": functionName},
 		Units:        prometheus.GenerateUnits(50, 50, 10),
@@ -105,7 +105,7 @@ func ExampleObject_StartMeasureExecTime() {
 	// Microseconds end
 
 	// Milliseconds start
-	ms := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_milli_sec",
 		Labels:       prometheus.Labels{"function": functionName},
 		Units:        prometheus.GenerateUnits(5, 5, 10),
@@ -122,7 +122,7 @@ func ExampleObject_StartMeasureExecTime() {
 	// Milliseconds end
 
 	// Seconds start
-	s := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	s := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_seconds",
 		Labels:       prometheus.Labels{"function": functionName},
 		Units:        prometheus.GenerateUnits(0.5, 0.5, 10),
@@ -139,7 +139,7 @@ func ExampleObject_StartMeasureExecTime() {
 	// Seconds end
 
 	// Minutes start
-	m := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_minutes",
 		Labels:       prometheus.Labels{"function": functionName},
 		Units:        prometheus.GenerateUnits(0.005, 0.005, 10),
@@ -245,7 +245,7 @@ func ExampleMeasureExecTime_StopMeasureExecTime() {
 		AppName:     "StopMeasureExecTime",
 	})
 
-	ms := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+	ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_milli_sec",
 		Labels:       prometheus.Labels{"function": "calculate"},
 		Units:        prometheus.GenerateUnits(5, 5, 10),

@@ -14,17 +14,26 @@ func ExampleParseOutput() {
 		AppName:     "ExampleParseOutput",
 	})
 
-	metric := p.GetMetrics("go_goroutines")
+	err := p.Counter(prometheus.CounterArgs{
+		MetricName: "parse_output_example",
+		Labels:     prometheus.Labels{"parsed": "true"},
+		Value:      1,
+	})
+	fmt.Println(err)
+
+	metric := p.GetMetrics("parse_output_example")
 	parsed := prometheus.ParseOutput(metric)
 
 	fmt.Println(metric)
 	fmt.Println(parsed)
 
-	// Output example:
-	// # HELP go_goroutines Number of goroutines that currently exist.
-	// # TYPE go_goroutines gauge
-	// go_goroutines 9
-	// map[go_goroutines:name:"go_goroutines" help:"Number of goroutines that currently exist." type:GAUGE metric:<> ]
+	// Output:
+	// <nil>
+	//
+	// # HELP parse_output_example Counter created for parse_output_example
+	// # TYPE parse_output_example counter
+	// parse_output_example{app="ExampleParseOutput",env="test",parsed="true"} 1
+	// map[parse_output_example:name:"parse_output_example" help:"Counter created for parse_output_example" type:COUNTER metric:<label:<name:"app" value:"ExampleParseOutput" > label:<name:"env" value:"test" > label:<name:"parsed" value:"true" > > ]
 }
 
 func ExampleGetLabels() {
@@ -36,8 +45,11 @@ func ExampleGetLabels() {
 	})
 
 	metric := "promhttp_metric_handler_requests_total"
-	err := p.Counter(metric, 1, prometheus.Labels{
-		"code": "200",
+
+	err := p.Counter(prometheus.CounterArgs{
+		MetricName: metric,
+		Labels:     prometheus.Labels{"code": "200"},
+		Value:      1,
 	})
 	fmt.Println(err)
 

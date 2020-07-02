@@ -92,9 +92,10 @@ of requests served, tasks completed, or errors.
 #### Example code
 
 ```go
-err := p.Counter("response_status", 1, prometheus.Labels{
-    "handler":    "MyHandler1",
-    "statuscode": "200",
+err := p.Counter(prometheus.CounterArgs{
+    MetricName: "response_status",
+    Labels:     prometheus.Labels{"handler": "MyHandler1", "statuscode": "200"},
+    Value:      1,
 })
 
 fmt.Println(p.GetMetrics("response_status"))
@@ -123,11 +124,13 @@ like the number of concurrent requests.
 #### Example code
 
 ```go
-err := p.Gauge("cpu_usage_example", 15, prometheus.Labels{
-    "core": "0",
+err := p.Gauge(prometheus.GaugeArgs{
+    MetricName: "cpu_usage_example",
+    Labels:     prometheus.Labels{"core": "0"},
+    Value:      15,
 })
 
-fmt.Println(p.GetMetrics("cpu_usage"))
+fmt.Println(p.GetMetrics("cpu_usage_example"))
 ```
 
 [Back to top](#table-of-contents)
@@ -137,7 +140,7 @@ fmt.Println(p.GetMetrics("cpu_usage"))
 ```bash
 # HELP cpu_usage Gauge created for cpu_usage
 # TYPE cpu_usage gauge
-cpu_usage{app="ExampleGauge",core="0",env="test"} 15
+cpu_usage_example{app="ExampleGauge",core="0",env="test"} 15
 ```
 
 [Back to top](#table-of-contents)
@@ -163,12 +166,12 @@ start := time.Now()
 // Elapsed time to measure the computation time
 // of a given function, handler, etc...
 defer func(begin time.Time) {
-    units := prometheus.GenerateUnits(0.05, 0.05, 5)
-    since := time.Since(begin).Seconds()
-
-    err := p.Histogram("get_stat", since, prometheus.Labels{
-        "handler": "purchases",
-    }, units...)
+    err := p.Histogram(prometheus.HistogramArgs{
+        MetricName: "get_stat",
+        Labels:     prometheus.Labels{"handler": "purchases"},
+        Units:      prometheus.GenerateUnits(0.5, 0.05, 5),
+        Value:      time.Since(begin).Seconds(),
+    })
 
     if err != nil {
         log.Fatal(err)
@@ -187,7 +190,7 @@ time.Sleep(100 * time.Millisecond)
 # TYPE get_stat histogram
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.15000000000000002"} 1
+get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.15"} 1
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.2"} 1
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.25"} 1
 get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="+Inf"} 1
@@ -203,7 +206,7 @@ To measure the runtime of a particular calculation use `StartMeasureExecTime` fu
 #### Example code
 
 ```go
-ms := p.StartMeasureExecTime(prometheus.MeasureExecTime{
+ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
     MetricName:   "execution_time_milli_sec",
     Labels:       prometheus.Labels{"function": "calculate"},
     Units:        prometheus.GenerateUnits(5, 5, 10),
@@ -246,13 +249,13 @@ execution_time_milli_sec_count{app="ExampleApp",env="test",function="calculate"}
 
 ### Other examples
 
-For more examples, please visit: [godoc page](https://godoc.org/github.com/takattila/prometheus#pkg-examples) .
+For more examples, please visit: [godoc page](https://pkg.go.dev/github.com/takattila/prometheus?tab=doc#pkg-examples) .
 
 [Back to top](#table-of-contents)
 
 ## Built-in statistics
 
-It **provides statistics** as well:
+It **provides system and application statistics** as well:
 
 - **Goroutines** (count)
 - **Memory** usage

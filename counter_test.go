@@ -14,9 +14,10 @@ type counterSuite struct {
 func (s counterSuite) TestCounter() {
 	p := New(initProm("TestCounter"))
 
-	err := p.Counter("example_counter", 1, Labels{
-		"foo1": "bar1",
-		"foo2": "bar2",
+	err := p.Counter(CounterArgs{
+		MetricName: "example_counter",
+		Labels:     Labels{"foo1": "bar1", "foo2": "bar2"},
+		Value:      1,
 	})
 	s.Equal(nil, err)
 
@@ -29,9 +30,10 @@ func (s counterSuite) TestCounter() {
 
 func (s counterSuite) TestCounterError() {
 	p := New(initProm("TestCounterError"))
-
-	actual := p.Counter("example_counter_error", 1, Labels{
-		"bad label foo1": "bar1",
+	actual := p.Counter(CounterArgs{
+		MetricName: "example_counter_error",
+		Labels:     Labels{"bad label foo1": "bar1"},
+		Value:      1,
 	})
 
 	// Incorrect label name

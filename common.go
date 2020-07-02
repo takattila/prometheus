@@ -98,6 +98,9 @@ func (o *Object) errorHandler(err interface{}, fqdn string, inputLabelNames []st
 }
 
 func (o *Object) addServiceInfoToLabels(labels Labels) Labels {
+	if labels == nil {
+		labels = Labels{}
+	}
 	labels["app"] = o.App
 	labels["env"] = o.Env
 	return labels

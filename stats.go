@@ -14,7 +14,7 @@ func (o *Object) statCountGoroutines() {
 
 		go func() {
 			for range t.C {
-				_ = o.Gauge("stat_goroutines:count", float64(runtime.NumGoroutine()), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_goroutines:count", Value: float64(runtime.NumGoroutine())})
 			}
 		}()
 	}
@@ -29,31 +29,31 @@ func (o *Object) statMemoryUsage() {
 				// System memory usage
 				m, _ := mem.VirtualMemory()
 				// Total amount of RAM on this system
-				_ = o.Gauge("stat_memory_usage:total", float64(m.Total), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:total", Value: float64(m.Total)})
 				// RAM available for programs to allocate
-				_ = o.Gauge("stat_memory_usage:avail", float64(m.Available), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:avail", Value: float64(m.Available)})
 				// RAM used by programs
-				_ = o.Gauge("stat_memory_usage:used", float64(m.Used), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:used", Value: float64(m.Used)})
 				// This is the kernel's notion of free memory
-				_ = o.Gauge("stat_memory_usage:free", float64(m.Free), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:free", Value: float64(m.Free)})
 				// Percentage of RAM used by programs
-				_ = o.Gauge("stat_memory_usage:used_percent", float64(m.UsedPercent), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:used_percent", Value: float64(m.UsedPercent)})
 
 				// Used memory by the application
 				var memory runtime.MemStats
 				runtime.ReadMemStats(&memory)
 				// Sys is the total bytes of memory obtained from the OS
-				_ = o.Gauge("stat_memory_usage:sys", float64(memory.Sys), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:sys", Value: float64(memory.Sys)})
 				// Alloc is bytes of allocated heap objects
-				_ = o.Gauge("stat_memory_usage:alloc", float64(memory.Alloc), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:alloc", Value: float64(memory.Alloc)})
 				// HeapSys is bytes of heap memory obtained from the OS
-				_ = o.Gauge("stat_memory_usage:heapsys", float64(memory.HeapSys), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:heapsys", Value: float64(memory.HeapSys)})
 				// HeapInuse is bytes in in-use spans
-				_ = o.Gauge("stat_memory_usage:heapinuse", float64(memory.HeapInuse), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:heapinuse", Value: float64(memory.HeapInuse)})
 				// Frees is the cumulative count of heap objects freed
-				_ = o.Gauge("stat_memory_usage:frees", float64(memory.Frees), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:frees", Value: float64(memory.Frees)})
 				// NumGC is the number of completed GC cycles
-				_ = o.Gauge("stat_memory_usage:numgc", float64(memory.NumGC), Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_memory_usage:numgc", Value: float64(memory.NumGC)})
 			}
 		}()
 	}
@@ -84,7 +84,7 @@ func (o *Object) statCpuUsage() {
 		go func() {
 			for range t.C {
 				percent := getCpuPercent().getFirstElement()
-				_ = o.Gauge("stat_cpu_usage:percent", percent, Labels{})
+				_ = o.Gauge(GaugeArgs{MetricName: "stat_cpu_usage:percent", Value: percent})
 			}
 		}()
 	}

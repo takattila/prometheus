@@ -16,10 +16,12 @@ func (s histogramSuite) TestHistogram() {
 	p := New(initProm("TestHistogram"))
 
 	begin := time.Since(time.Now()).Seconds()
-	err := p.Histogram("example_histogram", begin, Labels{
-		"foo1": "bar1",
-		"foo2": "bar2",
-	}, GenerateUnits(0.5, 0.5, 20)...)
+	err := p.Histogram(HistogramArgs{
+		MetricName: "example_histogram",
+		Labels:     Labels{"foo1": "bar1", "foo2": "bar2"},
+		Units:      GenerateUnits(0.5, 0.5, 20),
+		Value:      begin,
+	})
 	s.Equal(nil, err)
 
 	for _, unit := range GenerateUnits(0.5, 0.5, 20) {
@@ -44,16 +46,19 @@ func (s histogramSuite) TestHistogramError() {
 	p := New(initProm("TestHistogramError"))
 
 	begin := time.Since(time.Now()).Seconds()
-	err := p.Histogram("example_histogram_error", begin, Labels{
-		"foo1": "bar1",
-		"foo2": "bar2",
+	err := p.Histogram(HistogramArgs{
+		MetricName: "example_histogram_error",
+		Labels:     Labels{"foo1": "bar1", "foo2": "bar2"},
+		Value:      begin,
 	})
 	s.Equal(nil, err)
 
 	// Missing label name
 	begin = time.Since(time.Now()).Seconds()
-	err = p.Histogram("example_histogram_error", begin, Labels{
-		"foo1": "bar1",
+	err = p.Histogram(HistogramArgs{
+		MetricName: "example_histogram_error",
+		Labels:     Labels{"foo1": "bar1"},
+		Value:      begin,
 	})
 
 	expected := `metric: 'example_histogram_error', error: 'inconsistent label cardinality: expected 4 label values but got 3 in prometheus.Labels{"app":"TestHistogramError", "env":"test", "foo1":"bar1"}', input label names: 'app, env, foo1', correct label names: 'app, env, foo1, foo2'` + "\n"
@@ -122,7 +127,7 @@ func (s histogramSuite) TestStartStopMeasureExecTime() {
 		},
 	} {
 		// Measure start
-		met := p.StartMeasureExecTime(MeasureExecTime{
+		met := p.StartMeasureExecTime(MeasureExecTimeArgs{
 			MetricName:   t.MetricName,
 			Units:        t.Units,
 			TimeDuration: t.TimeDuration,

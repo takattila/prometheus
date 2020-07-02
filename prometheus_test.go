@@ -14,9 +14,10 @@ func (s prometheusSuite) TestStartHttpServer() {
 	// 1. Create new object and stert the HTTP server paralel.
 	p := New(initProm("TestStartHttpServer"))
 
-	err := p.Counter("example_start_http_server", 1, Labels{
-		"foo1": "bar1",
-		"foo2": "bar2",
+	err := p.Counter(CounterArgs{
+		MetricName: "example_start_http_server",
+		Labels:     Labels{"foo1": "bar1", "foo2": "bar2"},
+		Value:      1,
 	})
 	s.Equal(nil, err)
 
@@ -43,9 +44,10 @@ func (s prometheusSuite) TestSetMetricsEndpoint() {
 	init.MetricEndpoint = "/metrics"
 	p := New(init)
 
-	err := p.Counter("example_set_metrics_endpoint", 1, Labels{
-		"foo1": "bar1",
-		"foo2": "bar2",
+	err := p.Counter(CounterArgs{
+		MetricName: "example_set_metrics_endpoint",
+		Labels:     Labels{"foo1": "bar1", "foo2": "bar2"},
+		Value:      1,
 	})
 	s.Equal(nil, err)
 

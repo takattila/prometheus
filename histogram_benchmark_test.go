@@ -12,11 +12,13 @@ func BenchmarkHistogram(b *testing.B) {
 		Environment: "test",
 		AppName:     "ExampleHistogram",
 	})
+	units := GenerateUnits(1, 1, 10)
 	for n := 0; n < b.N; n++ {
-		since := time.Since(time.Now()).Seconds()
-		units := GenerateUnits(1, 1, 5)
-		_ = p.Histogram("history", since, Labels{
-			"sell": "actual",
-		}, units...)
+		_ = p.Histogram(HistogramArgs{
+			MetricName: "history",
+			Labels:     Labels{"sell": "actual"},
+			Units:      units,
+			Value:      time.Since(time.Now()).Seconds(),
+		})
 	}
 }

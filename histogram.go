@@ -7,6 +7,15 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// HistogramArgs contains the necessary arguments
+// of the *Object.Histogram function.
+type HistogramArgs struct {
+	MetricName string
+	Labels     Labels
+	Units      []float64
+	Value      float64
+}
+
 // Histogram samples observations (usually things like request durations
 // or response sizes) and counts them in configurable buckets.
 // It also provides a sum of all observed values.
@@ -25,21 +34,21 @@ import (
 //
 // A histogram is also suitable to calculate an Apdex score.
 // When operating on buckets, remember that the histogram is cumulative.
-func (o *Object) Histogram(metricName string, value float64, labels Labels, units ...float64) (err error) {
-	labels = o.addServiceInfoToLabels(labels)
+func (o *Object) Histogram(args HistogramArgs) (err error) {
+	args.Labels = o.addServiceInfoToLabels(args.Labels)
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, metricName, getLabelNames(labels))
+			err = o.errorHandler(r, args.MetricName, getLabelNames(args.Labels))
 		}
 	}()
-	if o.histograms[metricName] == nil {
-		o.histograms[metricName] = promauto.With(o.reg).NewHistogramVec(prometheus.HistogramOpts{
-			Name:    metricName,
-			Help:    "Histogram created for " + metricName,
-			Buckets: makeLinearBuckets(units),
-		}, getLabelNames(labels))
+	if o.histograms[args.MetricName] == nil {
+		o.histograms[args.MetricName] = promauto.With(o.reg).NewHistogramVec(prometheus.HistogramOpts{
+			Name:    args.MetricName,
+			Help:    "Histogram created for " + args.MetricName,
+			Buckets: makeLinearBuckets(args.Units),
+		}, getLabelNames(args.Labels))
 	}
-	o.histograms[metricName].With(prometheus.Labels(labels)).Observe(value)
+	o.histograms[args.MetricName].With(prometheus.Labels(args.Labels)).Observe(args.Value)
 	return
 }
 
@@ -71,7 +80,7 @@ func makeLinearBuckets(buckets []float64) []float64 {
 	return buckets
 }
 
-// MeasureExecTime is used by
+// MeasureExecTimeArgs is used by
 // Start and StopMeasureExecTime functions.
 type MeasureExecTime struct {
 	MetricName   string
@@ -83,15 +92,25 @@ type MeasureExecTime struct {
 	start  time.Time
 }
 
+// MeasureExecTimeArgs contains the necessary arguments
+// of the *Object.StartMeasureExecTime function.
+type MeasureExecTimeArgs MeasureExecTime
+
 // StartMeasureExecTime launches the measurement of the runtime
 // of a particular calculation.
 //
 // Use the TimeDuration field to set the unit of the elapsed time measurement:
 // Minute, Second, Millisecond, Microsecond, Nanosecond.
-func (o *Object) StartMeasureExecTime(m MeasureExecTime) *MeasureExecTime {
-	m.object = o
-	m.start = time.Now()
-	return &m
+func (o *Object) StartMeasureExecTime(m MeasureExecTimeArgs) *MeasureExecTime {
+	return &MeasureExecTime{
+		MetricName:   m.MetricName,
+		Labels:       m.Labels,
+		Units:        m.Units,
+		TimeDuration: m.TimeDuration,
+
+		object: o,
+		start:  time.Now(),
+	}
 }
 
 // StopMeasureExecTime ends the execution time measurement.
@@ -111,5 +130,10 @@ func (m *MeasureExecTime) StopMeasureExecTime() error {
 	default:
 		executionTime = float64(time.Since(m.start).Nanoseconds() / 1e6)
 	}
-	return m.object.Histogram(m.MetricName, executionTime, m.Labels, m.Units...)
+	return m.object.Histogram(HistogramArgs{
+		MetricName: m.MetricName,
+		Labels:     m.Labels,
+		Units:      m.Units,
+		Value:      executionTime,
+	})
 }

@@ -5,27 +5,35 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+// GaugeArgs contains the necessary arguments
+// of the *Object.Gauge function.
+type GaugeArgs struct {
+	MetricName string
+	Labels     Labels
+	Value      float64
+}
+
 // Gauge is a metric that represents a single numerical value
 // that can arbitrarily go up and down.
 //
 // Gauges are typically used for measured values like temperatures
 // or current memory usage, but also "counts" that can go up and down,
 // like the number of concurrent requests.
-func (o *Object) Gauge(metricName string, value float64, labels Labels) (err error) {
-	labels = o.addServiceInfoToLabels(labels)
+func (o *Object) Gauge(args GaugeArgs) (err error) {
+	args.Labels = o.addServiceInfoToLabels(args.Labels)
 	defer func() {
 		if r := recover(); r != nil {
-			err = o.errorHandler(r, metricName, getLabelNames(labels))
+			err = o.errorHandler(r, args.MetricName, getLabelNames(args.Labels))
 		}
 	}()
-	if o.gauges[metricName] == nil {
-		o.gauges[metricName] = promauto.With(o.reg).NewGaugeVec(prometheus.GaugeOpts{
-			Name: metricName,
-			Help: "Gauge created for " + metricName,
-		}, getLabelNames(labels))
-		o.gauges[metricName].With(prometheus.Labels(labels)).Add(value)
+	if o.gauges[args.MetricName] == nil {
+		o.gauges[args.MetricName] = promauto.With(o.reg).NewGaugeVec(prometheus.GaugeOpts{
+			Name: args.MetricName,
+			Help: "Gauge created for " + args.MetricName,
+		}, getLabelNames(args.Labels))
+		o.gauges[args.MetricName].With(prometheus.Labels(args.Labels)).Add(args.Value)
 		return
 	}
-	o.gauges[metricName].With(prometheus.Labels(labels)).Set(value)
+	o.gauges[args.MetricName].With(prometheus.Labels(args.Labels)).Set(args.Value)
 	return
 }

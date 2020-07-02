@@ -12,8 +12,10 @@ func BenchmarkGauge(b *testing.B) {
 		AppName:     "ExampleGauge",
 	})
 	for n := 0; n < b.N; n++ {
-		_ = p.Gauge("cpu_usage_example", 15, Labels{
-			"core": "0",
+		_ = p.Gauge(GaugeArgs{
+			MetricName: "cpu_usage_example",
+			Labels:     Labels{"core": "0"},
+			Value:      15,
 		})
 	}
 }

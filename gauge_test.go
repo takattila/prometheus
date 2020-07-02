@@ -15,8 +15,10 @@ func (s gaugeSuite) TestGauge() {
 	p := New(initProm("TestGauge"))
 
 	for _, value := range []float64{5, 2, 19, 77} {
-		err := p.Gauge("example_gauge", value, Labels{
-			"foo1": "bar1",
+		err := p.Gauge(GaugeArgs{
+			MetricName: "example_gauge",
+			Labels:     Labels{"foo1": "bar1"},
+			Value:      value,
 		})
 		s.Equal(nil, err)
 
@@ -32,13 +34,17 @@ func (s gaugeSuite) TestGauge() {
 func (s gaugeSuite) TestGaugeError() {
 	p := New(initProm("TestGaugeError"))
 
-	err := p.Gauge("example_gauge_error", 60, Labels{
-		"foo1": "bar1",
+	err := p.Gauge(GaugeArgs{
+		MetricName: "example_gauge_error",
+		Labels:     Labels{"foo1": "bar1"},
+		Value:      60,
 	})
 	s.Equal(nil, err)
 
-	actual := p.Gauge("example_gauge_error", 50, Labels{
-		"bad_label": "bar1",
+	actual := p.Gauge(GaugeArgs{
+		MetricName: "example_gauge_error",
+		Labels:     Labels{"bad_label": "bar1"},
+		Value:      50,
 	})
 
 	// Bad label name

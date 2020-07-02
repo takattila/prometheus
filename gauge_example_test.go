@@ -14,8 +14,10 @@ func ExampleObject_Gauge() {
 		AppName:     "ExampleGauge",
 	})
 
-	err := p.Gauge("cpu_usage_example", 15, prometheus.Labels{
-		"core": "0",
+	err := p.Gauge(prometheus.GaugeArgs{
+		MetricName: "cpu_usage_example",
+		Labels:     prometheus.Labels{"core": "0"},
+		Value:      15,
 	})
 
 	fmt.Println()
