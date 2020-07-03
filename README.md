@@ -222,8 +222,6 @@ exposes multiple time series during a scrape:
 #### Example code
 
 ```go
-start := time.Now()
-
 // Elapsed time to measure the computation time
 // of a given function, handler, etc...
 defer func(begin time.Time) {
