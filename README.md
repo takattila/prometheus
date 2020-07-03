@@ -237,9 +237,9 @@ defer func(begin time.Time) {
         Value:      time.Since(begin).Seconds(),
     })
 
-	if err != nil {
-		log.Fatal(err)
-	}
+    if err != nil {
+	log.Fatal(err)
+    }
 }(time.Now())
 ```
 
