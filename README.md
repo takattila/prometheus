@@ -19,6 +19,9 @@ about the system and the application:
   - Memory usage,
   - CPU usage.
 
+Pprof HTTP server [can be enabled](#enable-pprof) to get runtime profiling data
+on `Host:Port/debug/pprof/` endpoint.
+
 ## Table of contents
 
 * [Example usage](#example-usage)
