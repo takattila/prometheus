@@ -53,6 +53,8 @@ about the system and the application:
 * [Enable pprof](#enable-pprof)
    * [Available profiles](#available-profiles)
    * [Example code](#example-code-5)
+* [Example Sevice - GO Source Code](EXAMPLE_SERVICE_GO.md#example-sevice---go-source-code)
+* [Example Sevice - Grafana Dashboard](EXAMPLE_SERVICE_GRAFANA.md#example-sevice---grafana-dashboard)
 
 ## Example usage
 
