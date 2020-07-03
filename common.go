@@ -16,14 +16,6 @@ import (
 func (o *Object) serve() *http.Server {
 	r := chi.NewRouter()
 
-	s := &http.Server{
-		Addr:           o.Addr,
-		Handler:        r,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 1 << 20,
-	}
-
 	r.Handle(o.MetricsEndpoint, promhttp.HandlerFor(
 		o.reg, promhttp.HandlerOpts{
 			DisableCompression:  true,
@@ -31,20 +23,30 @@ func (o *Object) serve() *http.Server {
 			EnableOpenMetrics:   true,
 		}))
 
-	r.HandleFunc("/debug/pprof/", pprof.Index)
+	if o.EnablePprof {
+		r.HandleFunc("/debug/pprof/", pprof.Index)
 
-	for _, pp := range []string{
-		"allocs",
-		"block",
-		"cmdline",
-		"goroutine",
-		"heap",
-		"mutex",
-		"profile",
-		"threadcreate",
-		"trace",
-	} {
-		r.Handle("/debug/pprof/"+pp+"", pprof.Handler((pp)))
+		for _, pp := range []string{
+			"allocs",
+			"block",
+			"cmdline",
+			"goroutine",
+			"heap",
+			"mutex",
+			"profile",
+			"threadcreate",
+			"trace",
+		} {
+			r.Handle("/debug/pprof/"+pp+"", pprof.Handler(pp))
+		}
+	}
+
+	s := &http.Server{
+		Addr:           o.Addr,
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
 
 	go func() { _ = s.ListenAndServe() }()

@@ -27,6 +27,7 @@ require (
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-openapi/strfmt v0.19.5 // indirect
 	github.com/gorilla/mux v1.7.3 // indirect
+	github.com/grokify/html-strip-tags-go v0.0.0-20200322061010-ea0c1cf2f119
 	github.com/hashicorp/consul/api v1.5.0 // indirect
 	github.com/hudl/fargo v1.3.0 // indirect
 	github.com/influxdata/influxdb v1.8.0 // indirect

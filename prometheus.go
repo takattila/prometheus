@@ -32,6 +32,7 @@ type Init struct {
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
 	StatCpuUsage        bool
+	EnablePprof         bool
 }
 
 // Object provides structure to use metric types.
@@ -44,6 +45,7 @@ type Object struct {
 	StatCountGoroutines bool
 	StatMemoryUsage     bool
 	StatCpuUsage        bool
+	EnablePprof         bool
 
 	counters   map[string]*prometheus.CounterVec
 	gauges     map[string]*prometheus.GaugeVec
@@ -73,6 +75,7 @@ func New(i Init) *Object {
 		StatCountGoroutines: i.StatCountGoroutines,
 		StatMemoryUsage:     i.StatMemoryUsage,
 		StatCpuUsage:        i.StatCpuUsage,
+		EnablePprof:         i.EnablePprof,
 
 		counters:   make(map[string]*prometheus.CounterVec),
 		gauges:     make(map[string]*prometheus.GaugeVec),

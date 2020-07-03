@@ -50,6 +50,9 @@ about the system and the application:
    * [Detailed List of Statistics](#detailed-list-of-statistics)
    * [Example Queries](#example-queries)
    * [Grafana Screenshot](#grafana-screenshot-4)
+* [Enable pprof](#enable-pprof)
+   * [Available profiles](#available-profiles)
+   * [Example code](#example-code-5)
 
 ## Example usage
 
@@ -70,6 +73,7 @@ p := prometheus.New(prometheus.Init{
     StatCountGoroutines: true,       // default: false
     StatMemoryUsage:     true,       // default: false
     StatCpuUsage:        true,       // default: false
+    EnablePprof:         true,       // default: false, endpoint: /debug/pprof/
 })
 ```
 
@@ -431,5 +435,40 @@ stat_memory_usage:numgc{app="ExampleService",env="test"}
 ### Grafana Screenshot
 
 ![counter screenshot](./img/screenshot-stats.png)
+
+[Back to top](#table-of-contents)
+
+## Enable pprof
+
+Enable pprof HTTP server to get runtime profiling data on `Host:Port/debug/pprof/` endpoint.
+
+### Available profiles
+
+- allocs
+- block
+- cmdline
+- goroutine
+- heap
+- mutex
+- profile
+- threadcreate
+- trace
+
+[Back to top](#table-of-contents)
+
+### Example code
+
+```go
+p := prometheus.New(prometheus.Init{
+    // Obligatory fields
+    Host:        "0.0.0.0",
+    Port:        prometheus.GetFreePort(),
+    Environment: "test",
+    AppName:     "ExampleService",
+
+    // Endpoint: /debug/pprof/
+    EnablePprof: true, // default: false, 
+})
+```
 
 [Back to top](#table-of-contents)

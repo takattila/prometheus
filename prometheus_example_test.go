@@ -20,6 +20,7 @@ func ExampleNew() {
 		StatCountGoroutines: true,       // default: false
 		StatMemoryUsage:     true,       // default: false
 		StatCpuUsage:        true,       // default: false
+		EnablePprof:         true,       // default: false, endpoint: /debug/pprof/
 	})
 
 	b, _ := json.MarshalIndent(p, "", "  ")
@@ -33,7 +34,8 @@ func ExampleNew() {
 	// 	"MetricsEndpoint": "/metrics",
 	// 	"StatCountGoroutines": true,
 	// 	"StatMemoryUsage": true,
-	// 	"StatCpuUsage": true
+	// 	"StatCpuUsage": true,
+	// 	"EnablePprof": true
 	// }
 
 }
