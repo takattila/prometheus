@@ -19,8 +19,6 @@ about the system and the application:
   - Memory usage,
   - CPU usage.
 
-![prometheus screenshot](./img/screenshot-01.png)
-
 ## Table of contents
 
 * [Example usage](#example-usage)
@@ -30,17 +28,28 @@ about the system and the application:
    * [Counter](#counter)
       * [Example code](#example-code-1)
       * [Example output](#example-output-1)
+      * [Example Query](#example-query)
+      * [Grafana Screenshot](#grafana-screenshot)
    * [Gauge](#gauge)
       * [Example code](#example-code-2)
       * [Example output](#example-output-2)
+      * [Example Query](#example-query-1)
+      * [Grafana Screenshot](#grafana-screenshot-1)
    * [Histogram](#histogram)
       * [Example code](#example-code-3)
       * [Example output](#example-output-3)
+      * [Example Query](#example-query-2)
+      * [Grafana Screenshot](#grafana-screenshot-2)
    * [Measure execution time](#measure-execution-time)
       * [Example code](#example-code-4)
       * [Example output](#example-output-4)
+      * [Example Query](#example-query-3)
+      * [Grafana Screenshot](#grafana-screenshot-3)
    * [Other examples](#other-examples)
 * [Built-in statistics](#built-in-statistics)
+   * [Detailed List of Statistics](#detailed-list-of-statistics)
+   * [Example Queries](#example-queries)
+   * [Grafana Screenshot](#grafana-screenshot-4)
 
 ## Example usage
 
@@ -84,11 +93,13 @@ p := prometheus.New(prometheus.Init{
 [Back to top](#table-of-contents)
 
 ### Counter
+
 Counter is a cumulative metric that represents a single monotonically increasing counter
 whose value can only increase or be reset to zero on restart.
 
 For example, you can use a counter to represent the number
 of requests served, tasks completed, or errors.
+
 #### Example code
 
 ```go
@@ -97,6 +108,10 @@ err := p.Counter(prometheus.CounterArgs{
     Labels:     prometheus.Labels{"handler": "MyHandler1", "statuscode": "200"},
     Value:      1,
 })
+
+if err != nil {
+    log.Fatal(err)
+}
 
 fmt.Println(p.GetMetrics("response_status"))
 ```
@@ -108,12 +123,35 @@ fmt.Println(p.GetMetrics("response_status"))
 ```bash
 # HELP response_status Counter created for response_status
 # TYPE response_status counter
-response_status{app="ExampleCounter",env="test",handler="MyHandler1",statuscode="200"} 1
+response_status{app="ExampleService",env="test",handler="MyHandler1",statuscode="200"} 1
 ```
 
 [Back to top](#table-of-contents)
 
+#### Example Query
+
+```bash
+# Pie Chart 
+response_status{app="ExampleService",env="test",handler="MyHandler1"}
+
+# Timeline
+sum(
+  increase(
+    response_status{app="ExampleService",env="test",handler="MyHandler1"}[5m]
+  )
+) by(statuscode)
+```
+
+[Back to top](#table-of-contents)
+
+#### Grafana Screenshot
+
+![counter screenshot](./img/screenshot-counter.png)
+
+[Back to top](#table-of-contents)
+
 ### Gauge
+
 Gauge is a metric that represents a single numerical value
 that can arbitrarily go up and down.
 
@@ -127,8 +165,12 @@ like the number of concurrent requests.
 err := p.Gauge(prometheus.GaugeArgs{
     MetricName: "cpu_usage_example",
     Labels:     prometheus.Labels{"core": "0"},
-    Value:      15,
+    Value:      float64(rand.Intn(100)),
 })
+
+if err != nil {
+    log.Fatal(err)
+}
 
 fmt.Println(p.GetMetrics("cpu_usage_example"))
 ```
@@ -140,12 +182,27 @@ fmt.Println(p.GetMetrics("cpu_usage_example"))
 ```bash
 # HELP cpu_usage Gauge created for cpu_usage
 # TYPE cpu_usage gauge
-cpu_usage_example{app="ExampleGauge",core="0",env="test"} 15
+cpu_usage_example{app="ExampleService",core="0",env="test"} 21
 ```
 
 [Back to top](#table-of-contents)
 
+#### Example Query
+
+```bash
+cpu_usage_example{app="ExampleService",core="0",env="test"} 
+```
+
+[Back to top](#table-of-contents)
+
+#### Grafana Screenshot
+
+![counter screenshot](./img/screenshot-gauge.png)
+
+[Back to top](#table-of-contents)
+
 ### Histogram
+
 Histogram samples observations (usually things like request durations
 or response sizes) and counts them in configurable buckets.
 It also provides a sum of all observed values.
@@ -167,18 +224,16 @@ start := time.Now()
 // of a given function, handler, etc...
 defer func(begin time.Time) {
     err := p.Histogram(prometheus.HistogramArgs{
-        MetricName: "get_stat",
-        Labels:     prometheus.Labels{"handler": "purchases"},
-        Units:      prometheus.GenerateUnits(0.5, 0.05, 5),
+        MetricName: "elapsed_time",
+        Labels:     prometheus.Labels{"handler": "MyHandler2"},
+        Units:      prometheus.GenerateUnits(0.05, 0.05, 10),
         Value:      time.Since(begin).Seconds(),
     })
 
-    if err != nil {
-        log.Fatal(err)
-    }
-}(start)
-
-time.Sleep(100 * time.Millisecond)
+	if err != nil {
+		log.Fatal(err)
+	}
+}(time.Now())
 ```
 
 [Back to top](#table-of-contents)
@@ -186,21 +241,45 @@ time.Sleep(100 * time.Millisecond)
 #### Example output
 
 ```bash
-# HELP get_stat Histogram created for get_stat
-# TYPE get_stat histogram
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.05"} 0
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.1"} 0
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.15"} 1
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.2"} 1
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="0.25"} 1
-get_stat_bucket{app="ExampleElapsedTime",env="test",handler="purchases",le="+Inf"} 1
-get_stat_sum{app="ExampleElapsedTime",env="test",handler="purchases"} 0.100132995
-get_stat_count{app="ExampleElapsedTime",env="test",handler="purchases"} 1
+# HELP elapsed_time Histogram created for elapsed_time
+# TYPE elapsed_time histogram
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.05"} 2
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.1"} 12
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.15"} 19
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.2"} 24
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.25"} 32
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.3"} 37
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.35"} 37
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.4"} 37
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.45"} 37
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.5"} 37
+elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="+Inf"} 37
+elapsed_time_sum{app="ExampleService",env="test",handler="MyHandler2"} 5.753144180000002
+elapsed_time_count{app="ExampleService",env="test",handler="MyHandler2"} 37
 ```
 
 [Back to top](#table-of-contents)
 
+#### Example Query
+
+```bash
+histogram_quantile(0.9,
+    rate(
+      elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2"}[5m]
+    ) 
+) 
+```
+
+[Back to top](#table-of-contents)
+
+#### Grafana Screenshot
+
+![counter screenshot](./img/screenshot-histogram.png)
+
+[Back to top](#table-of-contents)
+
 ### Measure execution time
+
 To measure the runtime of a particular calculation use `StartMeasureExecTime` function.
 
 #### Example code
@@ -230,35 +309,71 @@ fmt.Println(p.GetMetrics("execution_time_milli_sec"))
 ```bash
 # HELP execution_time_milli_sec Histogram created for execution_time_milli_sec
 # TYPE execution_time_milli_sec histogram
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="5"} 0
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="10"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="15"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="20"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="25"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="30"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="35"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="40"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="45"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="50"} 1
-execution_time_milli_sec_bucket{app="ExampleApp",env="test",function="calculate",le="+Inf"} 1
-execution_time_milli_sec_sum{app="ExampleApp",env="test",function="calculate"} 10
-execution_time_milli_sec_count{app="ExampleApp",env="test",function="calculate"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="5"} 0
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="10"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="15"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="20"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="25"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="30"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="35"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="40"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="45"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="50"} 1
+execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="+Inf"} 1
+execution_time_milli_sec_sum{app="ExampleService",env="test",function="calculate"} 10
+execution_time_milli_sec_count{app="ExampleService",env="test",function="calculate"} 1
 ```
+
+[Back to top](#table-of-contents)
+
+#### Example Query
+
+```bash
+histogram_quantile(0.9,
+    rate(
+        execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate"}[5m]
+    )
+) 
+```
+
+[Back to top](#table-of-contents)
+
+#### Grafana Screenshot
+
+![counter screenshot](./img/screenshot-exectime.png)
 
 [Back to top](#table-of-contents)
 
 ### Other examples
 
-For more examples, please visit: [godoc page](https://pkg.go.dev/github.com/takattila/prometheus?tab=doc#pkg-examples) .
+For more examples, please visit: [pkg.go.dev](https://pkg.go.dev/github.com/takattila/prometheus?tab=doc#pkg-examples) page.
 
 [Back to top](#table-of-contents)
 
 ## Built-in statistics
 
-It **provides system and application statistics** as well:
+The following built-in system and application statistics can be turned on/off 
+on Prometheus Object initialization.
 
-- **Goroutines** (count)
-- **Memory** usage
+```go
+p := prometheus.New(prometheus.Init{
+    // Obligatory fields
+    Host:        "0.0.0.0",
+    Port:        prometheus.GetFreePort(),
+    Environment: "test",
+    AppName:     "ExampleService",
+
+    // Application and system statistics fields
+    StatCountGoroutines: true,       // default: false
+    StatMemoryUsage:     true,       // default: false
+    StatCpuUsage:        true,       // default: false
+})
+```
+
+### Detailed List of Statistics
+
+- **Goroutines** (count) `StatCountGoroutines: true`
+- **Memory** usage `StatMemoryUsage: true`
 
   - **System**:
   
@@ -276,8 +391,45 @@ It **provides system and application statistics** as well:
     - `HeapInuse`: bytes in in-use spans
     - `NumGC`: the number of completed GC cycles
 
-- **CPU** usage (percentage)
+- **CPU** usage (percentage) `StatCpuUsage: true`
 
 [Back to top](#table-of-contents)
 
-![prometheus screenshot](./img/screenshot-02.png)
+### Example Queries
+
+```bash
+# Used memory (System)
+stat_memory_usage:used_percent{app="ExampleService",env="test"}
+
+# Memory: sys (Application)
+stat_memory_usage:sys{app="ExampleService",env="test"}
+
+# Memory: alloc (Application)
+stat_memory_usage:alloc{app="ExampleService",env="test"}
+
+# Memory: frees (Application)
+stat_memory_usage:frees{app="ExampleService",env="test"}
+
+# Free memory (System)
+100 - stat_memory_usage:used_percent{app="ExampleService",env="test"}
+
+# Memory: sys (Application)
+stat_memory_usage:sys{app="ExampleService",env="test"}
+
+# Memory: heapsys (Application)
+stat_memory_usage:heapsys{app="ExampleService",env="test"}
+
+# Memory: heapinuse (Application)
+stat_memory_usage:heapinuse{app="ExampleService",env="test"}
+
+# Memory: numgc (Application)
+stat_memory_usage:numgc{app="ExampleService",env="test"}
+```
+
+[Back to top](#table-of-contents)
+
+### Grafana Screenshot
+
+![counter screenshot](./img/screenshot-stats.png)
+
+[Back to top](#table-of-contents)
