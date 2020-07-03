@@ -78,7 +78,7 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 			}))
 		}(time.Now())
 
-		// Response status - Gauge
+		// Response status - Counter
 		fatalIfErr(p.Counter(prometheus.CounterArgs{
 			MetricName: "response_status",
 			Labels: prometheus.Labels{
@@ -88,6 +88,7 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 			Value: 1,
 		}))
 
+		// CPU usage - Gauge
 		fatalIfErr(p.Gauge(prometheus.GaugeArgs{
 			MetricName: "cpu_usage",
 			Labels:     prometheus.Labels{"handler": handlerName},
