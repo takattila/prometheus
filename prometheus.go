@@ -14,17 +14,6 @@
 //
 // Pprof HTTP server can be enabled to get runtime profiling data
 // on Host:Port/debug/pprof/ endpoint.
-//
-// Available profiles:
-//   - allocs
-//   - block
-//   - cmdline
-//   - goroutine
-//   - heap
-//   - mutex
-//   - profile
-//   - threadcreate
-//   - trace
 package prometheus
 
 import (
