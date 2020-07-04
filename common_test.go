@@ -49,7 +49,7 @@ func (s commonSuite) TestEnablePprof() {
 	p := New(i)
 
 	count := 0
-	maxLoops := 10
+	maxLoops := 50
 
 	for {
 		if count == maxLoops {
