@@ -234,7 +234,7 @@ defer func(begin time.Time) {
 	err := p.Histogram(prometheus.HistogramArgs{
         MetricName: "response_time:milli_sec",
         Labels:     prometheus.Labels{"handler": "MyHandler1"},
-        Units:      prometheus.GenerateUnits(0.05, 0.05, 10),
+        Buckets:    prometheus.GenerateBuckets(0.05, 0.05, 10),
         Value:      time.Since(begin).Seconds(),
     })
 
@@ -296,7 +296,7 @@ To measure the runtime of a particular calculation use `StartMeasureExecTime` fu
 m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
     MetricName:   "execution_time:minutes",
     Labels:       prometheus.Labels{"handler": handlerName},
-    Units:        prometheus.GenerateUnits(0.005, 0.005, 20),
+    Buckets:      prometheus.GenerateBuckets(0.005, 0.005, 20),
     TimeDuration: time.Minute,
 })
 

@@ -12,7 +12,7 @@ import (
 type HistogramArgs struct {
 	MetricName string
 	Labels     Labels
-	Units      []float64
+	Buckets    []float64
 	Value      float64
 }
 
@@ -45,7 +45,7 @@ func (o *Object) Histogram(args HistogramArgs) (err error) {
 		o.histograms[args.MetricName] = promauto.With(o.reg).NewHistogramVec(prometheus.HistogramOpts{
 			Name:    args.MetricName,
 			Help:    "Histogram created for " + args.MetricName,
-			Buckets: makeLinearBuckets(args.Units),
+			Buckets: makeLinearBuckets(args.Buckets),
 		}, getLabelNames(args.Labels))
 	}
 	o.histograms[args.MetricName].With(prometheus.Labels(args.Labels)).Observe(args.Value)
@@ -62,8 +62,8 @@ func calculateDecimalPlaces(start, width float64) (dp int) {
 	return
 }
 
-// GenerateUnits creates a float64 slice to measure request durations.
-func GenerateUnits(start, width float64, count int) []float64 {
+// GenerateBuckets creates a float64 slice to measure request durations.
+func GenerateBuckets(start, width float64, count int) []float64 {
 	buckets := prometheus.LinearBuckets(start, width, count)
 	dp := calculateDecimalPlaces(start, width)
 	for i := range buckets {
@@ -75,7 +75,7 @@ func GenerateUnits(start, width float64, count int) []float64 {
 
 func makeLinearBuckets(buckets []float64) []float64 {
 	if len(buckets) == 0 {
-		return GenerateUnits(0.5, 0.5, 20)
+		return GenerateBuckets(0.5, 0.5, 20)
 	}
 	return buckets
 }
@@ -85,7 +85,7 @@ func makeLinearBuckets(buckets []float64) []float64 {
 type MeasureExecTime struct {
 	MetricName   string
 	Labels       Labels
-	Units        []float64
+	Buckets      []float64
 	TimeDuration time.Duration
 
 	object *Object
@@ -105,7 +105,7 @@ func (o *Object) StartMeasureExecTime(m MeasureExecTimeArgs) *MeasureExecTime {
 	return &MeasureExecTime{
 		MetricName:   m.MetricName,
 		Labels:       m.Labels,
-		Units:        m.Units,
+		Buckets:      m.Buckets,
 		TimeDuration: m.TimeDuration,
 
 		object: o,
@@ -133,7 +133,7 @@ func (m *MeasureExecTime) StopMeasureExecTime() error {
 	return m.object.Histogram(HistogramArgs{
 		MetricName: m.MetricName,
 		Labels:     m.Labels,
-		Units:      m.Units,
+		Buckets:    m.Buckets,
 		Value:      executionTime,
 	})
 }

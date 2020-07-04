@@ -24,7 +24,7 @@ func ExampleObject_Histogram() {
 		err := p.Histogram(prometheus.HistogramArgs{
 			MetricName: "get_stat",
 			Labels:     prometheus.Labels{"handler": "purchases"},
-			Units:      prometheus.GenerateUnits(0.5, 0.05, 5),
+			Buckets:    prometheus.GenerateBuckets(0.5, 0.05, 5),
 			Value:      time.Since(begin).Seconds(),
 		})
 
@@ -48,12 +48,12 @@ func ExampleObject_Histogram() {
 	// get_stat_count{app="ExampleHistogram",env="test",handler="purchases"} 1
 }
 
-func ExampleGenerateUnits() {
-	units := prometheus.GenerateUnits(1, 1.5, 8)
-	fmt.Println(units)
+func ExampleGenerateBuckets() {
+	buckets := prometheus.GenerateBuckets(1, 1.5, 8)
+	fmt.Println(buckets)
 
-	units = prometheus.GenerateUnits(2, 4, 10)
-	fmt.Println(units)
+	buckets = prometheus.GenerateBuckets(2, 4, 10)
+	fmt.Println(buckets)
 
 	// Output:
 	// [1 2.5 4 5.5 7 8.5 10 11.5]
@@ -74,7 +74,7 @@ func ExampleObject_StartMeasureExecTime() {
 	ns := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_nano_sec",
 		Labels:       prometheus.Labels{"function": functionName},
-		Units:        prometheus.GenerateUnits(5000, 10000, 10),
+		Buckets:      prometheus.GenerateBuckets(5000, 10000, 10),
 		TimeDuration: time.Nanosecond,
 	})
 	time.Sleep(5000 * time.Nanosecond)
@@ -91,7 +91,7 @@ func ExampleObject_StartMeasureExecTime() {
 	µs := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_micro_sec",
 		Labels:       prometheus.Labels{"function": functionName},
-		Units:        prometheus.GenerateUnits(50, 50, 10),
+		Buckets:      prometheus.GenerateBuckets(50, 50, 10),
 		TimeDuration: time.Microsecond,
 	})
 	time.Sleep(100 * time.Microsecond)
@@ -108,7 +108,7 @@ func ExampleObject_StartMeasureExecTime() {
 	ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_milli_sec",
 		Labels:       prometheus.Labels{"function": functionName},
-		Units:        prometheus.GenerateUnits(5, 5, 10),
+		Buckets:      prometheus.GenerateBuckets(5, 5, 10),
 		TimeDuration: time.Millisecond,
 	})
 	time.Sleep(10 * time.Millisecond)
@@ -125,7 +125,7 @@ func ExampleObject_StartMeasureExecTime() {
 	s := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_seconds",
 		Labels:       prometheus.Labels{"function": functionName},
-		Units:        prometheus.GenerateUnits(0.5, 0.5, 10),
+		Buckets:      prometheus.GenerateBuckets(0.5, 0.5, 10),
 		TimeDuration: time.Second,
 	})
 	time.Sleep(1 * time.Second)
@@ -142,7 +142,7 @@ func ExampleObject_StartMeasureExecTime() {
 	m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_minutes",
 		Labels:       prometheus.Labels{"function": functionName},
-		Units:        prometheus.GenerateUnits(0.005, 0.005, 10),
+		Buckets:      prometheus.GenerateBuckets(0.005, 0.005, 10),
 		TimeDuration: time.Minute,
 	})
 	time.Sleep(1 * time.Second)
@@ -248,7 +248,7 @@ func ExampleMeasureExecTime_StopMeasureExecTime() {
 	ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 		MetricName:   "execution_time_milli_sec",
 		Labels:       prometheus.Labels{"function": "calculate"},
-		Units:        prometheus.GenerateUnits(5, 5, 10),
+		Buckets:      prometheus.GenerateBuckets(5, 5, 10),
 		TimeDuration: time.Millisecond,
 	})
 

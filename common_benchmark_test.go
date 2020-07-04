@@ -2,9 +2,9 @@ package prometheus
 
 import "testing"
 
-func BenchmarkGenerateUnits(b *testing.B) {
+func BenchmarkGenerateBuckets(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		GenerateUnits(0.5, 1, 10)
+		GenerateBuckets(0.5, 1, 10)
 	}
 }
 

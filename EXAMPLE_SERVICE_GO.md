@@ -73,7 +73,7 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 			fatalIfErr(p.Histogram(prometheus.HistogramArgs{
 				MetricName: "response_time:sec",
 				Labels:     prometheus.Labels{"handler": handlerName},
-				Units:      prometheus.GenerateUnits(1, 1, 10),
+				Buckets:    prometheus.GenerateBuckets(1, 1, 10),
 				Value:      time.Since(begin).Seconds(),
 			}))
 		}(time.Now())
@@ -99,50 +99,50 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 		ns := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 			MetricName:   "execution_time:nano_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
-			Units:        prometheus.GenerateUnits(5000, 5000, 20),
+			Buckets:      prometheus.GenerateBuckets(5000, 5000, 20),
 			TimeDuration: time.Nanosecond,
 		})
-		calculateSomething(1000, time.Nanosecond)
+		calculateSomethinWhichTakesMax(1000, time.Nanosecond)
 		fatalIfErr(ns.StopMeasureExecTime())
 
 		// MeasureExecTime - Microseconds
 		µs := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 			MetricName:   "execution_time:micro_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
-			Units:        prometheus.GenerateUnits(50, 50, 20),
+			Buckets:      prometheus.GenerateBuckets(50, 50, 20),
 			TimeDuration: time.Microsecond,
 		})
-		calculateSomething(1000, time.Microsecond)
+		calculateSomethinWhichTakesMax(1000, time.Microsecond)
 		fatalIfErr(µs.StopMeasureExecTime())
 
 		// MeasureExecTime - Milliseconds
 		ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 			MetricName:   "execution_time:milli_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
-			Units:        prometheus.GenerateUnits(5, 5, 20),
+			Buckets:      prometheus.GenerateBuckets(5, 5, 20),
 			TimeDuration: time.Millisecond,
 		})
-		calculateSomething(100, time.Millisecond)
+		calculateSomethinWhichTakesMax(100, time.Millisecond)
 		fatalIfErr(ms.StopMeasureExecTime())
 
 		// MeasureExecTime - Seconds
 		s := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 			MetricName:   "execution_time:seconds",
 			Labels:       prometheus.Labels{"handler": handlerName},
-			Units:        prometheus.GenerateUnits(0.5, 0.5, 10),
+			Buckets:      prometheus.GenerateBuckets(0.5, 0.5, 10),
 			TimeDuration: time.Second,
 		})
-		calculateSomething(5, time.Second)
+		calculateSomethinWhichTakesMax(5, time.Second)
 		fatalIfErr(s.StopMeasureExecTime())
 
 		// MeasureExecTime - Minutes
 		m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
 			MetricName:   "execution_time:minutes",
 			Labels:       prometheus.Labels{"handler": handlerName},
-			Units:        prometheus.GenerateUnits(0.005, 0.005, 20),
+			Buckets:      prometheus.GenerateBuckets(0.005, 0.005, 20),
 			TimeDuration: time.Minute,
 		})
-		calculateSomething(5, time.Second)
+		calculateSomethinWhichTakesMax(5, time.Second)
 		fatalIfErr(m.StopMeasureExecTime())
 	}
 }
@@ -157,7 +157,7 @@ func MyHandler2(p *prometheus.Object) http.HandlerFunc {
 			fatalIfErr(p.Histogram(prometheus.HistogramArgs{
 				MetricName: "response_time:milli_sec",
 				Labels:     prometheus.Labels{"handler": handlerName},
-				Units:      prometheus.GenerateUnits(0.05, 0.05, 10),
+				Buckets:    prometheus.GenerateBuckets(0.05, 0.05, 10),
 				Value:      time.Since(begin).Seconds(),
 			}))
 		}(time.Now())
@@ -179,7 +179,7 @@ func MyHandler2(p *prometheus.Object) http.HandlerFunc {
 			Value: 1,
 		}))
 
-		calculateSomething(300, time.Millisecond)
+		calculateSomethinWhichTakesMax(300, time.Millisecond)
 	}
 }
 
@@ -189,7 +189,7 @@ func fatalIfErr(err error) {
 	}
 }
 
-func calculateSomething(num int, duration time.Duration) {
+func calculateSomethinWhichTakesMax(num int, duration time.Duration) {
 	time.Sleep(time.Duration(rand.Intn(num)) * duration)
 }
 
