@@ -162,7 +162,7 @@ func MyHandler2(p *prometheus.Object) http.HandlerFunc {
 			}))
 		}(time.Now())
 
-		// Response status - Gauge
+		// Response status - Counter
 		fatalIfErr(p.Counter(prometheus.CounterArgs{
 			MetricName: "response_status",
 			Labels: prometheus.Labels{
