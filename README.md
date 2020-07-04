@@ -232,11 +232,11 @@ exposes multiple time series during a scrape:
 // of a given function, handler, etc...
 defer func(begin time.Time) {
 	err := p.Histogram(prometheus.HistogramArgs{
-        MetricName: "response_time:milli_sec",
-        Labels:     prometheus.Labels{"handler": "MyHandler1"},
-        Buckets:    prometheus.GenerateBuckets(0.05, 0.05, 10),
-        Value:      time.Since(begin).Seconds(),
-    })
+		MetricName: "response_time:milli_sec",
+		Labels:     prometheus.Labels{"handler": "MyHandler1"},
+		Buckets:    prometheus.GenerateBuckets(0.05, 0.05, 10),
+		Value:      time.Since(begin).Seconds(),
+	})
 
 	if err != nil {
 		log.Fatal(err)
