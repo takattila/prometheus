@@ -57,7 +57,7 @@ on `Host:Port/debug/pprof/` endpoint.
    * [Available profiles](#available-profiles)
    * [Example code](#example-code-5)
 * [Example Sevice - GO Source Code](EXAMPLE_SERVICE_GO.md#example-sevice---go-source-code)
-* [Example Sevice - Grafana Dashboard](EXAMPLE_SERVICE_GRAFANA.md#example-sevice---grafana-dashboard)
+* [Example Sevice - Grafana Dashboard](EXAMPLE_SERVICE_GRAFANA.json#example-sevice---grafana-dashboard)
 
 ## Example usage
 
@@ -94,7 +94,8 @@ p := prometheus.New(prometheus.Init{
   "MetricsEndpoint": "/metrics",
   "StatCountGoroutines": true,
   "StatMemoryUsage": true,
-  "StatCpuUsage": true
+  "StatCpuUsage": true,
+  "EnablePprof": true
 }
 
 ```
@@ -172,8 +173,8 @@ like the number of concurrent requests.
 
 ```go
 err := p.Gauge(prometheus.GaugeArgs{
-    MetricName: "cpu_usage_example",
-    Labels:     prometheus.Labels{"core": "0"},
+    MetricName: "response_size",
+    Labels:     prometheus.Labels{"handler": "MyHandler1"},
     Value:      float64(rand.Intn(100)),
 })
 
@@ -181,7 +182,7 @@ if err != nil {
     log.Fatal(err)
 }
 
-fmt.Println(p.GetMetrics("cpu_usage_example"))
+fmt.Println(p.GetMetrics("response_size"))
 ```
 
 [Back to top](#table-of-contents)
@@ -189,9 +190,9 @@ fmt.Println(p.GetMetrics("cpu_usage_example"))
 #### Example output
 
 ```bash
-# HELP cpu_usage Gauge created for cpu_usage
-# TYPE cpu_usage gauge
-cpu_usage_example{app="ExampleService",core="0",env="test"} 21
+# HELP response_size Gauge created for response_size
+# TYPE response_size gauge
+response_size{app="exampleService",env="test",handler="MyHandler1"} 52
 ```
 
 [Back to top](#table-of-contents)
@@ -199,7 +200,7 @@ cpu_usage_example{app="ExampleService",core="0",env="test"} 21
 #### Example Query
 
 ```bash
-cpu_usage_example{app="ExampleService",core="0",env="test"} 
+response_size{app="exampleService",env="test",handler="MyHandler1"}
 ```
 
 [Back to top](#table-of-contents)
@@ -230,16 +231,16 @@ exposes multiple time series during a scrape:
 // Elapsed time to measure the computation time
 // of a given function, handler, etc...
 defer func(begin time.Time) {
-    err := p.Histogram(prometheus.HistogramArgs{
-        MetricName: "elapsed_time",
-        Labels:     prometheus.Labels{"handler": "MyHandler2"},
+	err := p.Histogram(prometheus.HistogramArgs{
+        MetricName: "response_time:milli_sec",
+        Labels:     prometheus.Labels{"handler": "MyHandler1"},
         Units:      prometheus.GenerateUnits(0.05, 0.05, 10),
         Value:      time.Since(begin).Seconds(),
     })
 
-    if err != nil {
-	log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 }(time.Now())
 ```
 
@@ -248,21 +249,21 @@ defer func(begin time.Time) {
 #### Example output
 
 ```bash
-# HELP elapsed_time Histogram created for elapsed_time
-# TYPE elapsed_time histogram
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.05"} 2
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.1"} 12
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.15"} 19
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.2"} 24
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.25"} 32
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.3"} 37
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.35"} 37
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.4"} 37
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.45"} 37
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="0.5"} 37
-elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2",le="+Inf"} 37
-elapsed_time_sum{app="ExampleService",env="test",handler="MyHandler2"} 5.753144180000002
-elapsed_time_count{app="ExampleService",env="test",handler="MyHandler2"} 37
+# HELP response_time:milli_sec Histogram created for response_time:milli_sec
+# TYPE response_time:milli_sec histogram
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.05"} 47
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.1"} 93
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.15"} 145
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.2"} 190
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.25"} 238
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.3"} 287
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.35"} 287
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.4"} 287
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.45"} 287
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="0.5"} 287
+response_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler2",le="+Inf"} 287
+response_time:milli_sec_sum{app="exampleService",env="test",handler="MyHandler2"} 42.85663311700002
+response_time:milli_sec_count{app="exampleService",env="test",handler="MyHandler2"} 287
 ```
 
 [Back to top](#table-of-contents)
@@ -272,8 +273,8 @@ elapsed_time_count{app="ExampleService",env="test",handler="MyHandler2"} 37
 ```bash
 histogram_quantile(0.9,
     rate(
-      elapsed_time_bucket{app="ExampleService",env="test",handler="MyHandler2"}[5m]
-    ) 
+        execution_time:milli_sec_bucket{app="exampleService",env="test",handler="MyHandler1"}[5m]
+    )
 ) 
 ```
 
@@ -292,21 +293,21 @@ To measure the runtime of a particular calculation use `StartMeasureExecTime` fu
 #### Example code
 
 ```go
-ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-    MetricName:   "execution_time_milli_sec",
-    Labels:       prometheus.Labels{"function": "calculate"},
-    Units:        prometheus.GenerateUnits(5, 5, 10),
-    TimeDuration: time.Millisecond,
+m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
+    MetricName:   "execution_time:minutes",
+    Labels:       prometheus.Labels{"handler": handlerName},
+    Units:        prometheus.GenerateUnits(0.005, 0.005, 20),
+    TimeDuration: time.Minute,
 })
 
-time.Sleep(10 * time.Millisecond)
+time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
 
-err := ms.StopMeasureExecTime()
+err := m.StopMeasureExecTime()
 if err != nil {
     log.Fatal(err)
 }
 
-fmt.Println(p.GetMetrics("execution_time_milli_sec"))
+fmt.Println(p.GetMetrics("execution_time:minutes"))
 ```
 
 [Back to top](#table-of-contents)
@@ -314,21 +315,31 @@ fmt.Println(p.GetMetrics("execution_time_milli_sec"))
 #### Example output
 
 ```bash
-# HELP execution_time_milli_sec Histogram created for execution_time_milli_sec
-# TYPE execution_time_milli_sec histogram
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="5"} 0
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="10"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="15"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="20"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="25"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="30"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="35"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="40"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="45"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="50"} 1
-execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate",le="+Inf"} 1
-execution_time_milli_sec_sum{app="ExampleService",env="test",function="calculate"} 10
-execution_time_milli_sec_count{app="ExampleService",env="test",function="calculate"} 1
+# HELP execution_time:minutes Histogram created for execution_time:minutes
+# TYPE execution_time:minutes histogram
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.005"} 119
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.01"} 119
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.015"} 119
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.02"} 228
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.025"} 228
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.03"} 228
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.035"} 338
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.04"} 338
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.045"} 338
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.05"} 338
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.055"} 439
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.06"} 439
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.065"} 439
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.07"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.075"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.08"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.085"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.09"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.095"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="0.1"} 534
+execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1",le="+Inf"} 534
+execution_time:minutes_sum{app="exampleService",env="test",handler="MyHandler1"} 16.868514283549988
+execution_time:minutes_count{app="exampleService",env="test",handler="MyHandler1"} 534
 ```
 
 [Back to top](#table-of-contents)
@@ -338,8 +349,8 @@ execution_time_milli_sec_count{app="ExampleService",env="test",function="calcula
 ```bash
 histogram_quantile(0.9,
     rate(
-        execution_time_milli_sec_bucket{app="ExampleService",env="test",function="calculate"}[5m]
-    )
+      execution_time:minutes_bucket{app="exampleService",env="test",handler="MyHandler1"}[5m]
+    ) 
 ) 
 ```
 

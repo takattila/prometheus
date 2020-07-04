@@ -71,9 +71,9 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 		// Elapsed time - Histogram
 		defer func(begin time.Time) {
 			fatalIfErr(p.Histogram(prometheus.HistogramArgs{
-				MetricName: "response_time",
+				MetricName: "response_time:sec",
 				Labels:     prometheus.Labels{"handler": handlerName},
-				Units:      prometheus.GenerateUnits(0.05, 0.05, 500),
+				Units:      prometheus.GenerateUnits(1, 1, 10),
 				Value:      time.Since(begin).Seconds(),
 			}))
 		}(time.Now())
@@ -88,61 +88,61 @@ func MyHandler1(p *prometheus.Object) http.HandlerFunc {
 			Value: 1,
 		}))
 
-		// CPU usage - Gauge
+		// Response Size - Gauge
 		fatalIfErr(p.Gauge(prometheus.GaugeArgs{
-			MetricName: "cpu_usage",
+			MetricName: "response_size",
 			Labels:     prometheus.Labels{"handler": handlerName},
 			Value:      float64(rand.Intn(100)),
 		}))
 
 		// MeasureExecTime - Nanoseconds
 		ns := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-			MetricName:   "execution_time_nano_sec",
+			MetricName:   "execution_time:nano_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
 			Units:        prometheus.GenerateUnits(5000, 5000, 20),
 			TimeDuration: time.Nanosecond,
 		})
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Nanosecond)
+		calculateSomething(1000, time.Nanosecond)
 		fatalIfErr(ns.StopMeasureExecTime())
 
 		// MeasureExecTime - Microseconds
 		µs := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-			MetricName:   "execution_time_micro_sec",
+			MetricName:   "execution_time:micro_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
 			Units:        prometheus.GenerateUnits(50, 50, 20),
 			TimeDuration: time.Microsecond,
 		})
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Microsecond)
+		calculateSomething(1000, time.Microsecond)
 		fatalIfErr(µs.StopMeasureExecTime())
 
 		// MeasureExecTime - Milliseconds
 		ms := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-			MetricName:   "execution_time_milli_sec",
+			MetricName:   "execution_time:milli_sec",
 			Labels:       prometheus.Labels{"handler": handlerName},
 			Units:        prometheus.GenerateUnits(5, 5, 20),
 			TimeDuration: time.Millisecond,
 		})
-		time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+		calculateSomething(100, time.Millisecond)
 		fatalIfErr(ms.StopMeasureExecTime())
 
 		// MeasureExecTime - Seconds
 		s := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-			MetricName:   "execution_time_seconds",
+			MetricName:   "execution_time:seconds",
 			Labels:       prometheus.Labels{"handler": handlerName},
 			Units:        prometheus.GenerateUnits(0.5, 0.5, 10),
 			TimeDuration: time.Second,
 		})
-		time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+		calculateSomething(5, time.Second)
 		fatalIfErr(s.StopMeasureExecTime())
 
 		// MeasureExecTime - Minutes
 		m := p.StartMeasureExecTime(prometheus.MeasureExecTimeArgs{
-			MetricName:   "execution_time_minutes",
+			MetricName:   "execution_time:minutes",
 			Labels:       prometheus.Labels{"handler": handlerName},
 			Units:        prometheus.GenerateUnits(0.005, 0.005, 20),
 			TimeDuration: time.Minute,
 		})
-		time.Sleep(time.Duration(rand.Intn(5)) * time.Second)
+		calculateSomething(5, time.Second)
 		fatalIfErr(m.StopMeasureExecTime())
 	}
 }
@@ -155,12 +155,19 @@ func MyHandler2(p *prometheus.Object) http.HandlerFunc {
 		// Elapsed time - Histogram
 		defer func(begin time.Time) {
 			fatalIfErr(p.Histogram(prometheus.HistogramArgs{
-				MetricName: "response_time",
+				MetricName: "response_time:milli_sec",
 				Labels:     prometheus.Labels{"handler": handlerName},
-				Units:      prometheus.GenerateUnits(0.05, 0.05, 100),
+				Units:      prometheus.GenerateUnits(0.05, 0.05, 10),
 				Value:      time.Since(begin).Seconds(),
 			}))
 		}(time.Now())
+
+		// Response Size - Gauge
+		fatalIfErr(p.Gauge(prometheus.GaugeArgs{
+			MetricName: "response_size",
+			Labels:     prometheus.Labels{"handler": handlerName},
+			Value:      float64(rand.Intn(100)),
+		}))
 
 		// Response status - Counter
 		fatalIfErr(p.Counter(prometheus.CounterArgs{
@@ -172,7 +179,7 @@ func MyHandler2(p *prometheus.Object) http.HandlerFunc {
 			Value: 1,
 		}))
 
-		time.Sleep(time.Duration(rand.Intn(300)) * time.Millisecond)
+		calculateSomething(300, time.Millisecond)
 	}
 }
 
@@ -180,6 +187,10 @@ func fatalIfErr(err error) {
 	if err != nil {
 		log.Fatal("[FATAL] ", err)
 	}
+}
+
+func calculateSomething(num int, duration time.Duration) {
+	time.Sleep(time.Duration(rand.Intn(num)) * duration)
 }
 
 func printMemStats() {
