@@ -1407,7 +1407,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "histogram_quantile(0.9,\n    rate(\n        execution_time:micro_sec_bucket{app=\"exampleService\",env=\"test\",handler=\"MyHandler1\"}[5m]\n    )\n) ",
+          "expr": "histogram_quantile(0.9,\n    rate(\n        execution_time:micro_sec_bucket{app=\"exampleService\",env=\"test\",handler=\"MyHandler1\"}[1m]\n    )\n) ",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2502,5 +2502,5 @@
   "timezone": "",
   "title": "Example service",
   "uid": "JTnT-NWMk",
-  "version": 96
+  "version": 97
 }
