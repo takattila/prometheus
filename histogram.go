@@ -7,6 +7,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 )
 
+var defaultBuckets = []float64{
+	0.000025, 0.00005, 0.0025, 0.005, 0.025, 0.05,
+	0.1, 0.25, 0.5, 1, 2.5, 5, 10, 20, 25, 50, 60, 120,
+}
+
 // HistogramArgs contains the necessary arguments
 // of the *Object.Histogram function.
 type HistogramArgs struct {
@@ -75,7 +80,7 @@ func GenerateBuckets(start, width float64, count int) []float64 {
 
 func makeLinearBuckets(buckets []float64) []float64 {
 	if len(buckets) == 0 {
-		return GenerateBuckets(0.5, 0.5, 20)
+		return defaultBuckets
 	}
 	return buckets
 }
