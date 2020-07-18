@@ -17,11 +17,7 @@ func (o *Object) serve() *http.Server {
 	r := chi.NewRouter()
 
 	r.Handle(o.MetricsEndpoint, promhttp.HandlerFor(
-		o.reg, promhttp.HandlerOpts{
-			DisableCompression:  true,
-			MaxRequestsInFlight: 1,
-			EnableOpenMetrics:   true,
-		}))
+		o.reg, promhttp.HandlerOpts{}))
 
 	if o.EnablePprof {
 		r.HandleFunc("/debug/pprof/", pprof.Index)
