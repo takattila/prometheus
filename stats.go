@@ -71,7 +71,7 @@ func getCpuPercent() cpuP {
 }
 
 func (c cpuP) getFirstElement() float64 {
-	if c.err != nil {
+	if c.err != nil || len(c.per) == 0 {
 		return float64(0)
 	}
 	return c.per[0]
